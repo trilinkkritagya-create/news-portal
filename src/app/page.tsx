@@ -1,4 +1,6 @@
+import Logout from "@/components/ui/Logout";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -64,6 +66,10 @@ export default function Home() {
           </a>
         </div>
       </main>
+      <Link href={"/login"}>
+        <button>Get Started</button>
+      </Link>
+      <Logout />
     </div>
   );
 }
