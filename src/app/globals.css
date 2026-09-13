@@ -1,26 +1,187 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ==========================================================================
+     BASE & SURFACES (Clean Editorial Newsprint)
+     ========================================================================== */
+  --background: #fbfbfb;
+  --foreground: #0f172a; /* Deep Slate Ink */
+
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  /* ==========================================================================
+     BRAND & ACTION (Authoritative Editorial Blue)
+     ========================================================================== */
+  --primary: #1e3a8a; /* Deep Cobalt Blue */
+  --primary-foreground: #ffffff;
+  --primary-hover: #1e40af;
+
+  --secondary: #f1f5f9; /* Slate 100 for subtle chips & toolbars */
+  --secondary-foreground: #1e293b;
+
+  --accent: #f8fafc;
+  --accent-foreground: #0f172a;
+
+  /* ==========================================================================
+     EDITORIAL STATES & ALERTS
+     ========================================================================== */
+  --breaking: #dc2626; /* Crimson for Breaking News banners */
+  --breaking-foreground: #ffffff;
+  --breaking-surface: #fef2f2;
+
+  --live: #16a34a; /* Green pulse for Live Coverage */
+  --live-surface: #f0fdf4;
+
+  --opinion: #854d0e; /* Warm amber/bronze for Columnists & Opinion pieces */
+  --opinion-surface: #fefce8;
+
+  /* ==========================================================================
+     MUTED, BORDERS & DIVIDERS (Hairline Newsprint Grids)
+     ========================================================================== */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b; /* For timestamps, bylines, read-time */
+
+  --border: #e2e8f0; /* Crisp 1px hairline rules */
+  --border-subtle: #f1f5f9;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+
+  /* ==========================================================================
+     CATEGORY ACCENT SYSTEM (Badges & Section Headers)
+     ========================================================================== */
+  --cat-world: #2563eb;    /* Blue */
+  --cat-tech: #7c3aed;     /* Violet */
+  --cat-finance: #059669;  /* Emerald */
+  --cat-politics: #dc2626; /* Red */
+  --cat-lifestyle: #db2777;/* Pink */
+  --cat-sports: #ea580c;   /* Orange */
+
+  --radius: 0.375rem; /* Slight editorial radius (6px) rather than overly rounded */
 }
 
+/* ==========================================================================
+   DARK MODE (Deep Slate / Obsidian)
+   ========================================================================== */
+.dark {
+  --background: #090d16;
+  --foreground: #f8fafc;
+
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+
+  --primary: #3b82f6;
+  --primary-foreground: #0f172a;
+  --primary-hover: #60a5fa;
+
+  --secondary: #1e293b;
+  --secondary-foreground: #f1f5f9;
+
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+
+  --breaking: #ef4444;
+  --breaking-foreground: #ffffff;
+  --breaking-surface: #450a0a;
+
+  --live: #22c55e;
+  --live-surface: #052e16;
+
+  --opinion: #fbbf24;
+  --opinion-surface: #422006;
+
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+
+  --border: #1e293b;
+  --border-subtle: #141d2f;
+  --input: #1e293b;
+  --ring: #3b82f6;
+
+  --cat-world: #60a5fa;
+  --cat-tech: #a78bfa;
+  --cat-finance: #34d399;
+  --cat-politics: #f87171;
+  --cat-lifestyle: #f472b6;
+  --cat-sports: #fb923c;
+}
+
+/* ==========================================================================
+   TAILWIND V4 INLINE THEME MAPPING
+   ========================================================================== */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-breaking: var(--breaking);
+  --color-breaking-foreground: var(--breaking-foreground);
+  --color-breaking-surface: var(--breaking-surface);
+
+  --color-live: var(--live);
+  --color-live-surface: var(--live-surface);
+
+  --color-opinion: var(--opinion);
+  --color-opinion-surface: var(--opinion-surface);
+
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-cat-world: var(--cat-world);
+  --color-cat-tech: var(--cat-tech);
+  --color-cat-finance: var(--cat-finance);
+  --color-cat-politics: var(--cat-politics);
+  --color-cat-lifestyle: var(--cat-lifestyle);
+  --color-cat-sports: var(--cat-sports);
+
+  --font-serif: var(--font-merriweather, var(--font-serif-fallback, Georgia, Cambria, serif));
+  --font-sans: var(--font-geist-sans, var(--font-inter, system-ui, sans-serif));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ==========================================================================
+   GLOBAL EDITORIAL DEFAULTS
+   ========================================================================== */
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Editorial column rules & dividers */
+.editorial-grid {
+  display: grid;
+  column-gap: 1.5rem;
+  row-gap: 2rem;
+}
+
+.editorial-divider {
+  border-bottom: 1px solid var(--border);
 }
