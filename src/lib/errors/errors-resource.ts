@@ -1,0 +1,14 @@
+export enum ErrorResource {
+  AUTH = "AUTH",
+  USER = "USER",
+  ARTICLE = "ARTICLE",
+  CATEGORY = "CATEGORY",
+  COMMENT = "COMMENT",
+  MEDIA = "MEDIA",
+  NEWS = "NEWS",
+  SEARCH = "SEARCH",
+  PROFILE = "PROFILE",
+  ADMIN = "ADMIN",
+  EXTERNAL_API = "EXTERNAL_API",
+  SYSTEM = "SYSTEM",
+}
