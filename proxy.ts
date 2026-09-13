@@ -35,12 +35,10 @@ export async function proxy(request: NextRequest) {
     if (session.role === UserRole.ADMIN || session.role === UserRole.AUTHOR) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-
     if (session.role === UserRole.MEMBER) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
-
   return NextResponse.next();
 }
 

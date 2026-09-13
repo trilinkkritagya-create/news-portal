@@ -1,6 +1,5 @@
 import SideBar from "@/components/dashboard/SideBar";
 import { getCurrentUser } from "@/lib/auth/authLib";
-import prisma from "@/lib/prisma";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
