@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { ErrorResource } from "@/lib/errors/errors-resource";
 import { handleError } from "@/lib/errors/handleError";
 import { normalizeError } from "@/lib/errors/normalizeError";
-import { authService } from "@/lib/services/auth/login-services";
+import { authService } from "@/lib/services/auth/login.service";
 import { loginSchema } from "@/lib/validation/auth-schema";
 import { createSession, logout } from "@/lib/auth/authLib";
 

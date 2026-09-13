@@ -23,7 +23,6 @@ export default async function Home() {
   const leadStory = MOCK_ARTICLES[0];
   const secondaryStories = [MOCK_ARTICLES[1], MOCK_ARTICLES[2]];
   const trendingStories = [MOCK_ARTICLES[3], MOCK_ARTICLES[4]];
-
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col antialiased selection:bg-primary selection:text-white">
       {/* Modern Compact Header */}
@@ -53,7 +52,6 @@ export default async function Home() {
         {/* 4. Modern Newsletter Card */}
         <NewsletterDispatch />
       </main>
-
       {/* Modern Minimalist Footer */}
       <PublicFooter />
     </div>
