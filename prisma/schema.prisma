@@ -21,7 +21,6 @@ enum ArticleStatus {
 }
 
 
-
 model User {
   id        String   @id @default(cuid())
 
@@ -97,12 +96,8 @@ model Article {
   @@index([status, publishedAt])
   @@index([categoryId, status, publishedAt])
   @@index([authorId, status])
-
-
   @@index([createdAt])
 }
-
-
 
 
 model Category {
