@@ -1,19 +1,22 @@
-import SideBar from "@/components/dashboard/SideBar";
+import DashboardShell from "@/components/dashboard/DashboardShell";
 import { getCurrentUser } from "@/lib/auth/authLib";
-import prisma from "@/lib/prisma";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "News App",
-  description: "Dashboard Page ",
+  title: "Newsroom Dashboard · News Portal",
+  description: "Editorial Newsroom and Content Operations Console",
 };
 
-export default async function DashboardLayout({ children }: LayoutProps<"/">) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const user = await getCurrentUser();
+
   return (
-    <>
-      <SideBar role={user?.role} />
+    <DashboardShell role={user?.role} user={user}>
       {children}
-    </>
+    </DashboardShell>
   );
 }

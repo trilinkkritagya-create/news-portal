@@ -67,11 +67,7 @@ export async function loginAction(
     };
   }
 
-  if (user.role === "ADMIN" || user.role === "AUTHOR") {
-    redirect("/dashboard");
-  }
-
-  redirect("/");
+  redirect("/dashboard");
 }
 export async function logoutAction() {
   await logout();
