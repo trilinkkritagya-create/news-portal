@@ -1,8 +1,10 @@
 import Logout from "@/components/ui/Logout";
+import { getCurrentUser } from "@/lib/auth/authLib";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
@@ -66,10 +68,13 @@ export default function Home() {
           </a>
         </div>
       </main>
-      <Link href={"/login"}>
-        <button>Get Started</button>
-      </Link>
-      <Logout />
+      {user ? (
+        <Logout />
+      ) : (
+        <Link href={"/login"}>
+          <button>Get Started</button>
+        </Link>
+      )}
     </div>
   );
 }
