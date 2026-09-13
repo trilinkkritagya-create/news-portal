@@ -185,3 +185,13 @@ body {
 .editorial-divider {
   border-bottom: 1px solid var(--border);
 }
+
+/* Hide scrollbar utility for sliders */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
