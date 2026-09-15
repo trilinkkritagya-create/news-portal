@@ -51,3 +51,22 @@ export const updateArticleSchema = z
       message: "At least one field is required to update the article.",
     },
   );
+
+export const updateArticleFeatureSchema = z
+  .object({
+    allowLikes: z.boolean().optional(),
+    allowComments: z.boolean().optional(),
+  })
+  .refine(
+    (data) => data.allowComments !== undefined || data.allowLikes !== undefined,
+    { message: "At least one article feature must be provided" },
+  );
+
+export const createCommentSchema = z.object({
+  articleId: z.string().trim().min(1, "Article ID is required."),
+  content: z
+    .string()
+    .trim()
+    .min(1, "Comment cannot be empty.")
+    .max(2000, "Comment must not exceed 2000 characters."),
+});

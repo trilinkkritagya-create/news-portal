@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
+    console.error(error);
     const appError = normalizeError(error, ErrorResource.ARTICLE);
     return NextResponse.json(
       {
@@ -63,6 +64,7 @@ export async function GET() {
       },
     );
   } catch (error) {
+    console.error(error);
     const appError = normalizeError(error, ErrorResource.ARTICLE);
 
     return NextResponse.json(
