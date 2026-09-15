@@ -5,6 +5,7 @@ import { Errors } from "@/lib/errors/errors";
 import { ErrorResource } from "@/lib/errors/errors-resource";
 import { generateSlug } from "@/lib/utils/slug";
 import { normalizeError } from "@/lib/errors/normalizeError";
+import sanitizeHtml from "sanitize-html";
 
 interface CreateArticleInput {
   title: string;
@@ -23,15 +24,33 @@ export interface UpdateArticleInput {
   excerpt?: string;
 }
 
+export interface updateArticleFeatureInput {
+  allowLikes?: boolean;
+  allowComments?: boolean;
+  allowShares?: boolean;
+}
+
+export interface CreateCommentInput {
+  articleId: string;
+  content: string;
+}
+
 class ArticleService {
   async createArticle(data: CreateArticleInput, user: AuthenticatedUser) {
     try {
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.AUTHOR) {
+      const author = await prisma.user.findUnique({
+        where: {
+          id: user.id,
+        },
+      });
+      if (author?.role !== UserRole.ADMIN && author?.role !== UserRole.AUTHOR) {
         throw Errors.forbidden(
           "You do not have permission to create an article.",
           ErrorResource.ARTICLE,
         );
       }
+      const sanitizedContent = sanitizeHtml(data.content);
+
       const baseSlug = generateSlug(data.title);
       let slug = baseSlug;
       let counter = 1;
@@ -47,7 +66,7 @@ class ArticleService {
       const article = await prisma.article.create({
         data: {
           title: data.title,
-          content: data.content,
+          content: sanitizedContent,
           excerpt: data.excerpt,
           authorId: user.id,
           slug,
@@ -55,7 +74,7 @@ class ArticleService {
       });
       return article;
     } catch (error) {
-      throw normalizeError(error, ErrorResource.ARTICLE);
+      throw error;
     }
   }
   async updateArticle(
@@ -172,42 +191,128 @@ class ArticleService {
       throw error;
     }
   }
-
-  async getArticleById(articleId: string) {
+  async updateArticlesFeatures(
+    articleId: string,
+    data: updateArticleFeatureInput,
+    user: AuthenticatedUser,
+  ) {
     try {
+      if (user.role !== UserRole.ADMIN) {
+        throw Errors.forbidden(
+          "Only admin can manage article features",
+          ErrorResource.ARTICLE,
+        );
+      }
+      console.log(data.allowLikes, "Is allow likes");
       const article = await prisma.article.findUnique({
-        where: { id: articleId },
-        include: {
-          author: {
-            select: { id: true, name: true, email: true, image: true },
-          },
-          category: {
-            select: { id: true, name: true, slug: true },
-          },
+        where: {
+          id: articleId,
+        },
+        select: {
+          id: true,
         },
       });
-
+      console.log(article, "article obtained");
       if (!article) {
-        throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
+        throw Errors.notFound("Article not found", ErrorResource.ARTICLE);
       }
-
-      return article;
+      const updatedArticle = await prisma.article.update({
+        where: {
+          id: articleId,
+        },
+        data: {
+          ...(data.allowLikes !== undefined && {
+            allowLikes: data.allowLikes,
+          }),
+          ...(data.allowComments !== undefined && {
+            allowComments: data.allowComments,
+          }),
+        },
+        select: {
+          id: true,
+          title: true,
+          allowLikes: true,
+          allowComments: true,
+        },
+      });
+      console.log(updatedArticle, "updated article");
+      return updatedArticle;
     } catch (error) {
-      throw normalizeError(error, ErrorResource.ARTICLE);
+      throw error;
     }
   }
+  async toggleLike(articleId: string, user: AuthenticatedUser) {
+    const article = await prisma.article.findUnique({
+      where: {
+        id: articleId,
+      },
+      select: {
+        id: true,
+        allowLikes: true,
+      },
+    });
 
-  async getArticleBySlug(slug: string) {
+    if (!article) {
+      throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
+    }
+
+    if (!article.allowLikes) {
+      throw Errors.forbidden(
+        "Likes are disabled for this article.",
+        ErrorResource.ARTICLE,
+      );
+    }
+
+    const existingLike = await prisma.articleLike.findUnique({
+      where: {
+        userId_articleId: {
+          userId: user.id,
+          articleId,
+        },
+      },
+    });
+
+    let liked: boolean;
+
+    if (existingLike) {
+      await prisma.articleLike.delete({
+        where: {
+          id: existingLike.id,
+        },
+      });
+
+      liked = false;
+    } else {
+      await prisma.articleLike.create({
+        data: {
+          userId: user.id,
+          articleId,
+        },
+      });
+
+      liked = true;
+    }
+
+    const likeCount = await prisma.articleLike.count({
+      where: {
+        articleId,
+      },
+    });
+
+    return {
+      liked,
+      likeCount,
+    };
+  }
+  async createComment(data: CreateCommentInput, user: AuthenticatedUser) {
     try {
       const article = await prisma.article.findUnique({
-        where: { slug },
-        include: {
-          author: {
-            select: { id: true, name: true, email: true, image: true, role: true },
-          },
-          category: {
-            select: { id: true, name: true, slug: true },
-          },
+        where: {
+          id: data.articleId,
+        },
+        select: {
+          id: true,
+          allowComments: true,
         },
       });
 
@@ -215,9 +320,38 @@ class ArticleService {
         throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
       }
 
-      return article;
+      if (!article.allowComments) {
+        throw Errors.forbidden(
+          "Comments are disabled for this article.",
+          ErrorResource.ARTICLE,
+        );
+      }
+
+      const comment = await prisma.comment.create({
+        data: {
+          content: data.content,
+          articleId: article.id,
+          userId: user.id,
+        },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          updatedAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+      });
+
+      return comment;
     } catch (error) {
-      throw normalizeError(error, ErrorResource.ARTICLE);
+      console.error("Create comment error:", error);
+      throw error;
     }
   }
 }
