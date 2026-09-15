@@ -7,6 +7,8 @@ import { normalizeError } from "@/lib/errors/normalizeError";
 import { articleService } from "@/lib/services/article/article.service";
 import {
   createArticleSchema,
+  createCommentSchema,
+  updateArticleFeatureSchema,
   updateArticleSchema,
 } from "@/lib/validation/article-schema";
 
@@ -49,6 +51,64 @@ export type DeleteArticleState = {
     resource: string;
   };
 };
+export type UpdateArticleFeaturesState = {
+  success: boolean;
+  message?: string;
+  error?: {
+    code: string;
+    message: string;
+    resource: string;
+  };
+  data?: {
+    article: {
+      id: string;
+      title: string;
+      allowLikes: boolean;
+      allowComments: boolean;
+      // allowShares: boolean;
+    };
+  };
+};
+
+export type LikeArticleState = {
+  success: boolean;
+  message?: string;
+
+  error?: {
+    code: string;
+    message: string;
+    resource: string;
+  };
+
+  data?: {
+    liked: boolean;
+    likeCount: number;
+  };
+};
+export type CreateCommentState = {
+  success: boolean;
+  message?: string;
+
+  error?: {
+    code: string;
+    message: string;
+    resource: string;
+  };
+
+  data?: {
+    comment: {
+      id: string;
+      content: string;
+      createdAt: Date;
+      updatedAt: Date;
+      user: {
+        id: string;
+        name: string | null;
+        image: string | null;
+      };
+    };
+  };
+};
 
 export async function createArticleAction(
   _previousState: CreateArticleState,
@@ -56,7 +116,6 @@ export async function createArticleAction(
 ): Promise<CreateArticleState> {
   try {
     const user = await requireAuth();
-
     const result = createArticleSchema.safeParse({
       title: formData.get("title"),
       content: formData.get("content"),
@@ -108,7 +167,6 @@ export async function updateArticleAction(
       content: formData.get("content"),
       excerpt: formData.get("excerpt") || undefined,
     });
-
     if (!result.success) {
       return {
         success: false,
@@ -119,13 +177,11 @@ export async function updateArticleAction(
         },
       };
     }
-
     const article = await articleService.updateArticle(
       articleId,
       result.data,
       user,
     );
-
     return {
       success: true,
       message: "Article updated successfully.",
@@ -158,6 +214,149 @@ export async function deleteArticleAction(
     };
   } catch (error) {
     const appError = normalizeError(error, ErrorResource.ARTICLE);
+
+    return {
+      success: false,
+      error: handleError(appError),
+    };
+  }
+}
+
+export async function updateArticleFeaturesAction(
+  _previousState: UpdateArticleFeaturesState,
+  formData: FormData,
+): Promise<UpdateArticleFeaturesState> {
+  try {
+    const user = await requireAuth();
+    const articleId = formData.get("articleId");
+    const result = updateArticleFeatureSchema.safeParse({
+      allowLikes:
+        formData.get("allowLikes") !== null
+          ? formData.get("allowLikes") === "true"
+          : undefined,
+
+      allowComments:
+        formData.get("allowComments") !== null
+          ? formData.get("allowComments") === "true"
+          : undefined,
+
+      allowShares:
+        formData.get("allowShares") !== null
+          ? formData.get("allowShares") === "true"
+          : undefined,
+    });
+
+    if (!articleId || typeof articleId !== "string") {
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION",
+          message: "Article ID is required.",
+          resource: ErrorResource.ARTICLE,
+        },
+      };
+    }
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION",
+          message:
+            result.error.issues[0]?.message ?? "Invalid article feature data.",
+          resource: ErrorResource.ARTICLE,
+        },
+      };
+    }
+
+    const article = await articleService.updateArticlesFeatures(
+      articleId,
+      result.data,
+      user,
+    );
+    return {
+      success: true,
+      message: "Article features updated successfully.",
+      data: {
+        article,
+      },
+    };
+  } catch (error) {
+    const appError = normalizeError(error, ErrorResource.ARTICLE);
+    return {
+      success: false,
+      error: handleError(appError),
+    };
+  }
+}
+export async function toggleArticleLikeAction(
+  _previousState: LikeArticleState,
+  formData: FormData,
+): Promise<LikeArticleState> {
+  try {
+    const articleId = formData.get("articleId");
+
+    if (typeof articleId !== "string" || !articleId.trim()) {
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION",
+          message: "Article ID is required.",
+          resource: ErrorResource.ARTICLE,
+        },
+      };
+    }
+    const user = await requireAuth();
+    const result = await articleService.toggleLike(articleId, user);
+
+    return {
+      success: true,
+      message: result.liked ? "Article liked." : "Article unliked.",
+      data: {
+        liked: result.liked,
+        likeCount: result.likeCount,
+      },
+    };
+  } catch (error) {
+    const appError = normalizeError(error, ErrorResource.ARTICLE);
+    return {
+      success: false,
+      error: handleError(appError),
+    };
+  }
+}
+export async function createCommentAction(
+  _previousState: CreateCommentState,
+  formData: FormData,
+): Promise<CreateCommentState> {
+  try {
+    const user = await requireAuth();
+
+    const result = createCommentSchema.safeParse({
+      articleId: formData.get("articleId"),
+      content: formData.get("content"),
+    });
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION",
+          message: result.error.issues[0]?.message ?? "Invalid comment data.",
+          resource: ErrorResource.COMMENT,
+        },
+      };
+    }
+    const comment = await articleService.createComment(result.data, user);
+    return {
+      success: true,
+      message: "Comment added successfully.",
+      data: {
+        comment,
+      },
+    };
+  } catch (error) {
+    const appError = normalizeError(error, ErrorResource.COMMENT);
 
     return {
       success: false,

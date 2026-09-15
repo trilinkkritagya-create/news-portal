@@ -13,7 +13,8 @@ export type SessionPayload = {
   role: UserRole;
 };
 
-const JWT_SECRET = process.env.JWT_SECRET || "news-portal-broadsheet-fallback-secret-2026";
+const JWT_SECRET =
+  process.env.JWT_SECRET || "news-portal-broadsheet-fallback-secret-2026";
 const key = new TextEncoder().encode(JWT_SECRET);
 const SALT_ROUNDS = 10;
 const ACCESS_TOKEN_COOKIE = "access_token";
@@ -133,7 +134,9 @@ export async function getCurrentUser() {
 
   // Fallback to mock user
   const mockUser = MOCK_USERS.find(
-    (u) => u.id === session.id || u.email.toLowerCase() === session.email.toLowerCase(),
+    (u) =>
+      u.id === session.id ||
+      u.email.toLowerCase() === session.email.toLowerCase(),
   );
 
   return {
