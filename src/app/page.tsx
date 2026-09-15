@@ -32,7 +32,7 @@ export default async function Home() {
       <BreakingTicker article={breakingArticle} />
 
       {/* Main Content Workspace */}
-      <main className="flex-1 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 w-full py-5 space-y-8 lg:space-y-10">
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 md:px-8 py-6 md:py-8 space-y-12">
         {/* 1. Hero Spotlight & Trending Stories */}
         <HeroLeadSection
           leadStory={leadStory}

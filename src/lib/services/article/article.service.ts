@@ -172,6 +172,57 @@ class ArticleService {
       throw error;
     }
   }
+
+  async getArticleById(articleId: string) {
+    try {
+      const article = await prisma.article.findUnique({
+        where: { id: articleId },
+        include: {
+          author: {
+            select: { id: true, name: true, email: true, image: true },
+          },
+          category: {
+            select: { id: true, name: true, slug: true },
+          },
+        },
+      });
+
+      if (!article) {
+        throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
+      }
+
+      return article;
+    } catch (error) {
+      throw normalizeError(error, ErrorResource.ARTICLE);
+    }
+  }
+
+  async getArticleBySlug(slug: string) {
+    try {
+      const article = await prisma.article.findUnique({
+        where: { slug },
+        include: {
+          author: {
+            select: { id: true, name: true, email: true, image: true, role: true },
+          },
+          category: {
+            select: { id: true, name: true, slug: true },
+          },
+        },
+      });
+
+      if (!article) {
+        throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
+      }
+
+      return article;
+    } catch (error) {
+      throw normalizeError(error, ErrorResource.ARTICLE);
+    }
+  }
 }
 
 export const articleService = new ArticleService();
+
+
+

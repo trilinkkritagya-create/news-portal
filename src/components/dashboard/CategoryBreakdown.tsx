@@ -8,55 +8,61 @@ export default function CategoryBreakdown({
   categories,
 }: CategoryBreakdownProps) {
   return (
-    <div className="border border-border bg-card p-5 rounded-lg">
-      <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
-        <h3 className="font-serif text-base font-bold text-foreground">
-          Category Distribution
-        </h3>
-        <span className="font-mono text-[10px] uppercase text-muted-foreground">
-          Volume %
+    <div className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-border">
+        <h4 className="font-serif font-bold text-sm text-foreground">
+          Category Breakdown
+        </h4>
+        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-muted-foreground border border-border">
+          Past 30D
         </span>
       </div>
 
-      <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
-        Percentage volume of catalogued manuscripts distributed across primary editorial desks.
+      <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">
+        Story volume distribution across primary editorial desks.
       </p>
 
-      <div className="space-y-4">
+      {/* Progress Bars */}
+      <div className="space-y-3">
         {categories.map((cat) => (
-          <div key={cat.slug} className="text-xs">
-            <div className="flex justify-between items-center mb-1.5 font-mono text-[11px]">
-              <span className="flex items-center gap-1.5 font-sans font-medium text-foreground">
+          <div key={cat.slug}>
+            <div className="flex justify-between items-center text-xs mb-1">
+              <span className="font-medium text-foreground flex items-center gap-1.5 text-[11px]">
                 <span
-                  className="h-2 w-2 inline-block shrink-0"
-                  style={{ backgroundColor: cat.color }}
-                ></span>
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: cat.color || "#1e3a8a" }}
+                />
                 {cat.name}
               </span>
-              <span className="font-semibold text-foreground">
+              <span className="font-mono text-muted-foreground text-[11px] font-semibold">
                 {cat.percentage}%{" "}
-                <span className="text-muted-foreground font-normal">
-                  ({cat.count})
-                </span>
+                <span className="font-normal text-[10px]">({cat.count})</span>
               </span>
             </div>
 
-            <div className="h-1.5 w-full bg-secondary overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
               <div
-                className="h-1.5 transition-all duration-300"
+                className="h-full rounded-full transition-all duration-500"
                 style={{
-                  width: `${Math.max(cat.percentage, 4)}%`,
-                  backgroundColor: cat.color,
+                  width: `${Math.max(cat.percentage, 5)}%`,
+                  backgroundColor: cat.color || "#1e3a8a",
                 }}
-              ></div>
+              />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-5 flex items-center justify-between border-t border-dashed border-border pt-3 font-mono text-[11px] text-muted-foreground">
+      {/* Bottom Telemetry */}
+      <div className="mt-4 pt-2.5 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground font-mono">
+        <span>Avg. Words / Article:</span>
+        <span className="font-semibold text-foreground">1,180 words</span>
+      </div>
+
+      <div className="mt-1.5 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
         <span>Active Desks:</span>
-        <span className="font-semibold text-live">
+        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
           {categories.length} / {categories.length} Online
         </span>
       </div>
