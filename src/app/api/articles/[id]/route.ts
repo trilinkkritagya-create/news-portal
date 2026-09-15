@@ -12,6 +12,50 @@ interface RouteContext {
   }>;
 }
 
+export async function GET(_request: NextRequest, context: RouteContext) {
+  try {
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "VALIDATION",
+            message: "Article ID is required.",
+            resource: ErrorResource.ARTICLE,
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    const article = await articleService.getArticleById(id);
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          article,
+        },
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    const appError = normalizeError(error, ErrorResource.ARTICLE);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: handleError(appError),
+      },
+      {
+        status: appError.statusCode ?? 500,
+      },
+    );
+  }
+}
+
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();

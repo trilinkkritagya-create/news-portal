@@ -6,7 +6,17 @@ import Image from "next/image";
 import { Search, X } from "lucide-react";
 import { MOCK_ARTICLES } from "@/lib/mock-data";
 
-export default function HeaderSearch() {
+interface HeaderSearchProps {
+  className?: string;
+  isFullWidth?: boolean;
+  onSelectArticle?: () => void;
+}
+
+export default function HeaderSearch({
+  className = "",
+  isFullWidth = false,
+  onSelectArticle,
+}: HeaderSearchProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,13 +75,19 @@ export default function HeaderSearch() {
     "Motorsports",
   ];
 
+  const handleArticleClick = () => {
+    setIsOpen(false);
+    onSelectArticle?.();
+  };
+
   return (
-    <div ref={containerRef} className="relative">
-      {/* Inline Search Input */}
+    <div ref={containerRef} className={`relative ${isFullWidth ? "w-full" : ""} ${className}`}>
+      {/* Search Input Box */}
       <div
-        className={`flex items-center rounded-full border px-3 py-1.5 text-xs transition-all w-44 lg:w-56 xl:w-68 ${isOpen
-          ? "border-foreground/40 bg-card shadow-xs"
-          : "border-border/80 bg-secondary/60 hover:bg-secondary hover:border-foreground/20"
+        className={`flex items-center rounded-lg border px-3 py-2 text-xs transition-all ${isFullWidth ? "w-full" : "w-44 lg:w-56 xl:w-68"
+          } ${isOpen
+            ? "border-primary/50 bg-card shadow-xs ring-1 ring-primary/20"
+            : "border-border/80 bg-slate-50 dark:bg-slate-900/60 hover:border-foreground/20"
           }`}
       >
         <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0 mr-2" />
@@ -84,7 +100,7 @@ export default function HeaderSearch() {
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Search articles..."
+          placeholder="Search news, archives, topics..."
           className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:outline-none w-full min-w-0"
         />
 
@@ -101,26 +117,31 @@ export default function HeaderSearch() {
             <X className="h-3 w-3" />
           </button>
         ) : (
-          <kbd className="hidden xl:inline-block rounded border border-border bg-card px-1.5 py-0.5 text-[9px] font-mono font-medium text-muted-foreground shrink-0">
-            ⌘K
-          </kbd>
+          !isFullWidth && (
+            <kbd className="hidden xl:inline-block rounded border border-border bg-card px-1.5 py-0.5 text-[9px] font-mono font-medium text-muted-foreground shrink-0">
+              ⌘K
+            </kbd>
+          )
         )}
       </div>
 
-      {/* Lightweight Non-Blocking Dropdown */}
+      {/* Dropdown Results */}
       {isOpen && (
-        <div className="absolute top-full mt-2 right-0 w-80 sm:w-96 rounded-xl border border-border bg-card shadow-xl z-50 overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150">
+        <div
+          className={`absolute top-full mt-1.5 left-0 ${isFullWidth ? "w-full" : "w-80 sm:w-96"
+            } rounded-xl border border-border bg-card shadow-2xl z-50 overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150`}
+        >
           {query.trim() ? (
             filteredArticles.length > 0 ? (
-              <div className="max-h-80 overflow-y-auto divide-y divide-border/60 py-1">
+              <div className="max-h-72 overflow-y-auto divide-y divide-border/60 py-1">
                 {filteredArticles.slice(0, 5).map((article) => (
                   <Link
                     key={article.id}
                     href={`/dashboard/articles?id=${article.id}`}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-start gap-3 p-3 hover:bg-secondary/60 transition-colors group"
+                    onClick={handleArticleClick}
+                    className="flex items-start gap-3 p-3 hover:bg-muted/60 transition-colors group"
                   >
-                    <div className="relative h-10 w-12 rounded-md overflow-hidden bg-secondary shrink-0 border border-border/60">
+                    <div className="relative h-10 w-12 rounded-md overflow-hidden bg-muted shrink-0 border border-border/60">
                       <Image
                         src={article.featuredImage}
                         alt={article.title}
@@ -148,13 +169,13 @@ export default function HeaderSearch() {
               </div>
             ) : (
               <div className="p-4 text-center text-xs text-muted-foreground">
-                No articles found matching &ldquo;{query}&rdquo;
+                No dispatches found matching &ldquo;{query}&rdquo;
               </div>
             )
           ) : (
             <div className="p-3.5 space-y-2">
               <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Quick Topics
+                Trending Searches
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {quickTopics.map((topic) => (
@@ -165,7 +186,7 @@ export default function HeaderSearch() {
                       setQuery(topic);
                       inputRef.current?.focus();
                     }}
-                    className="px-2.5 py-1 rounded-md bg-secondary text-[11px] font-medium text-foreground hover:bg-secondary/80 transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-md bg-muted text-[11px] font-medium text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
                   >
                     {topic}
                   </button>

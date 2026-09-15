@@ -1,11 +1,16 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   /* ==========================================================================
      BASE & SURFACES (Clean Editorial Newsprint)
      ========================================================================== */
   --background: #fbfbfb;
-  --foreground: #0f172a; /* Deep Slate Ink */
+  --foreground: #0f172a;
+  /* Deep Slate Ink */
 
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -16,11 +21,13 @@
   /* ==========================================================================
      BRAND & ACTION (Authoritative Editorial Blue)
      ========================================================================== */
-  --primary: #1e3a8a; /* Deep Cobalt Blue */
+  --primary: #1e3a8a;
+  /* Deep Cobalt Blue */
   --primary-foreground: #ffffff;
   --primary-hover: #1e40af;
 
-  --secondary: #f1f5f9; /* Slate 100 for subtle chips & toolbars */
+  --secondary: #f1f5f9;
+  /* Slate 100 for subtle chips & toolbars */
   --secondary-foreground: #1e293b;
 
   --accent: #f8fafc;
@@ -29,23 +36,28 @@
   /* ==========================================================================
      EDITORIAL STATES & ALERTS
      ========================================================================== */
-  --breaking: #dc2626; /* Crimson for Breaking News banners */
+  --breaking: #dc2626;
+  /* Crimson for Breaking News banners */
   --breaking-foreground: #ffffff;
   --breaking-surface: #fef2f2;
 
-  --live: #16a34a; /* Green pulse for Live Coverage */
+  --live: #16a34a;
+  /* Green pulse for Live Coverage */
   --live-surface: #f0fdf4;
 
-  --opinion: #854d0e; /* Warm amber/bronze for Columnists & Opinion pieces */
+  --opinion: #854d0e;
+  /* Warm amber/bronze for Columnists & Opinion pieces */
   --opinion-surface: #fefce8;
 
   /* ==========================================================================
      MUTED, BORDERS & DIVIDERS (Hairline Newsprint Grids)
      ========================================================================== */
   --muted: #f1f5f9;
-  --muted-foreground: #64748b; /* For timestamps, bylines, read-time */
+  --muted-foreground: #64748b;
+  /* For timestamps, bylines, read-time */
 
-  --border: #e2e8f0; /* Crisp 1px hairline rules */
+  --border: #e2e8f0;
+  /* Crisp 1px hairline rules */
   --border-subtle: #f1f5f9;
   --input: #e2e8f0;
   --ring: #2563eb;
@@ -53,14 +65,31 @@
   /* ==========================================================================
      CATEGORY ACCENT SYSTEM (Badges & Section Headers)
      ========================================================================== */
-  --cat-world: #2563eb;    /* Blue */
-  --cat-tech: #7c3aed;     /* Violet */
-  --cat-finance: #059669;  /* Emerald */
-  --cat-politics: #dc2626; /* Red */
-  --cat-lifestyle: #db2777;/* Pink */
-  --cat-sports: #ea580c;   /* Orange */
+  --cat-world: #2563eb;
+  /* Blue */
+  --cat-tech: #7c3aed;
+  /* Violet */
+  --cat-finance: #059669;
+  /* Emerald */
+  --cat-politics: #dc2626;
+  /* Red */
+  --cat-lifestyle: #db2777;
+  /* Pink */
+  --cat-sports: #ea580c;
+  /* Orange */
 
-  --radius: 0.375rem; /* Slight editorial radius (6px) rather than overly rounded */
+  --radius: 0.375rem;
+
+  /* shadcn extras */
+  --destructive: #ef4444;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #1e3a8a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #2563eb;
 }
 
 /* ==========================================================================
@@ -110,6 +139,16 @@
   --cat-politics: #f87171;
   --cat-lifestyle: #f472b6;
   --cat-sports: #fb923c;
+
+  --destructive: #f87171;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #3b82f6;
 }
 
 /* ==========================================================================
@@ -152,6 +191,7 @@
   --color-border-subtle: var(--border-subtle);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
 
   --color-cat-world: var(--cat-world);
   --color-cat-tech: var(--cat-tech);
@@ -160,19 +200,38 @@
   --color-cat-lifestyle: var(--cat-lifestyle);
   --color-cat-sports: var(--cat-sports);
 
-  --font-serif: var(--font-merriweather, var(--font-serif-fallback, Georgia, Cambria, serif));
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-serif: var(--font-merriweather, Georgia, Cambria, serif);
   --font-sans: var(--font-geist-sans, var(--font-inter, system-ui, sans-serif));
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
 
 /* ==========================================================================
    GLOBAL EDITORIAL DEFAULTS
    ========================================================================== */
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-feature-settings: "rlig" 1, "calt" 1;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
 /* Editorial column rules & dividers */
@@ -190,8 +249,130 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
+/* Editorial article body typography & accents */
+.font-editorial-body {
+  font-family: var(--font-serif);
+  line-height: 1.85;
+  font-size: 1.125rem;
+}
+
+.font-editorial-body p {
+  margin-bottom: 1.25rem;
+}
+
+.font-editorial-body h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.75rem;
+  margin-bottom: 0.875rem;
+}
+
+.font-editorial-body h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.font-editorial-body h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.font-editorial-body blockquote {
+  border-left: 4px solid #1e1b4b;
+  padding: 0.5rem 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+  background: rgba(248, 250, 252, 0.7);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.dark .font-editorial-body blockquote {
+  border-left-color: #6366f1;
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.font-editorial-body ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.font-editorial-body ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.font-editorial-body a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Custom Editorial Typography: Drop Cap */
+.editor-dropcap::first-letter {
+  float: left;
+  font-family: var(--font-serif, 'Newsreader', Georgia, serif);
+  font-size: 4.25rem;
+  line-height: 0.8;
+  padding-top: 0.35rem;
+  padding-right: 0.85rem;
+  padding-bottom: 0.15rem;
+  color: #0b132b;
+  font-weight: 600;
+}
+
+.dark .editor-dropcap::first-letter {
+  color: var(--foreground);
+}
+
+/* Custom Editor Scrollbar */
+.custom-editor-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-editor-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-editor-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.custom-editor-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile Editor Floating Bar Shadow */
+.shadow-floating-bar {
+  box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.08), 0 -1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--font-serif, 'Newsreader', Georgia, serif);
+  font-size: 3.85rem;
+  line-height: 0.78;
+  padding-top: 0.28rem;
+  padding-right: 0.65rem;
+  padding-bottom: 0.1rem;
+  font-weight: 700;
+  color: #0b132b;
+}
+
+.dark .drop-cap::first-letter {
+  color: var(--foreground);
+}

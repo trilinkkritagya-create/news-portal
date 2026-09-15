@@ -2,17 +2,27 @@
 
 import { logoutAction } from "@/lib/actions/auth/login-action";
 import { LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-const Logout = () => {
+interface LogoutProps {
+  className?: string;
+}
+
+const Logout = ({ className }: LogoutProps) => {
   return (
     <form action={logoutAction} className="w-full">
-      <button
+      <Button
         type="submit"
-        className="group flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/25 cursor-pointer"
+        variant="ghost"
+        size="sm"
+        className={
+          className ||
+          "group flex w-full items-center justify-start gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer transition-colors h-8"
+        }
       >
-        <LogOut className="h-4.5 w-4.5 shrink-0 text-red-500 transition-colors group-hover:text-red-600 dark:text-red-400" />
+        <LogOut className="size-3.5 shrink-0 text-destructive transition-transform group-hover:-translate-x-0.5" />
         <span>Logout</span>
-      </button>
+      </Button>
     </form>
   );
 };

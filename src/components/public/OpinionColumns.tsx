@@ -1,91 +1,102 @@
 "use client";
 
-import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { MOCK_USERS } from "@/lib/mock-data";
 
 export default function OpinionColumns() {
   const columnists = [
     {
-      author: MOCK_USERS[0], // Alexander Vance
-      title: "The Editorial Thesis: The Imperative of Open Research in the Quantum Century",
-      excerpt: "Why foundational neural models must not be locked behind proprietary walls.",
-      topic: "Editorial Column",
+      initials: "MS",
+      name: "Marcus Sterling",
+      role: "Lead Political Essayist",
+      quote:
+        "“The Fragile Consensus: Why Institutional Trust Demands Radically Transparent Governance.”",
+      body: "Democratic resilience cannot rely on opaque executive prerogatives when civic cohesion is tested by asynchronous communication shifts.",
+      color: "bg-slate-800",
+      href: "/dashboard/articles",
     },
     {
-      author: MOCK_USERS[1], // Sophia Chen
-      title: "Generative Systems and the Fragility of Digital Truth",
-      excerpt: "As synthetic media surpasses human discrimination, provenance is our only defense.",
-      topic: "Frontier Tech",
+      initials: "ER",
+      name: "Dr. Elena Rostova",
+      role: "Digital Ethics & Frontier Tech",
+      quote:
+        "“We Are Engineering Cognitive Engines Faster Than Our Legal Frameworks Can Comprehend.”",
+      body: "When models simulate synthetic intentions, constitutional doctrines around responsibility and agency must be rewritten from first principles.",
+      color: "bg-primary",
+      href: "/dashboard/articles",
     },
     {
-      author: MOCK_USERS[2], // Marcus Sterling
-      title: "The Death of Settlement Delay: What Instant Liquidity Means for Markets",
-      excerpt: "When central banks eliminate the clearing window, commercial banking will transform.",
-      topic: "Macro Markets",
+      initials: "DT",
+      name: "David Thorne",
+      role: "Global Economics & Capital",
+      quote:
+        "“The Re-Shoring Paradox: How Subsidies Risk Fracturing the Multilateral Trading System.”",
+      body: "Industrial policy guarantees short-term domestic self-reliance while quietly inflating global consumer costs and sparking retaliatory tariffs.",
+      color: "bg-slate-700",
+      href: "/dashboard/articles",
     },
   ];
 
   return (
-    <section id="opinion" className="py-10 border-b border-border/80 space-y-6">
-      <div className="flex items-center justify-between border-b border-border/80 pb-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
-            Editorial Perspectives
+    <section id="opinion" className="border-t border-border pt-8 space-y-6 scroll-mt-20">
+      {/* Section Header with Rule */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
+        <div className="flex items-center space-x-4 flex-1">
+          <h2 className="font-headline text-xl font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 shrink-0">
+            Opinion &amp; Editorial Voices
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Original viewpoints and commentary from resident writers and guest analysts.
-          </p>
+          <div className="hidden sm:block flex-grow border-t border-border" />
         </div>
+        <span className="text-xs text-muted-foreground font-serif italic shrink-0">
+          Perspectives on Governance &amp; Progress
+        </span>
       </div>
 
+      {/* 3 Columnists Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {columnists.map((col, idx) => (
-          <article
+          <div
             key={idx}
-            className="group rounded-2xl border border-border bg-card p-6 flex flex-col justify-between hover:border-foreground/30 hover:shadow-md transition-all duration-300"
+            className="bg-amber-50/40 dark:bg-amber-950/20 p-6 rounded-lg border border-amber-200/60 dark:border-amber-800/40 flex flex-col justify-between hover:border-amber-400/80 transition-colors shadow-2xs"
           >
-            <div className="space-y-4">
-              {/* Author Header */}
-              <div className="flex items-center gap-3">
-                <Image
-                  src={col.author.image}
-                  alt={col.author.name}
-                  width={44}
-                  height={44}
-                  unoptimized
-                  className="h-11 w-11 rounded-full object-cover border-2 border-border"
-                />
+            <div className="space-y-3">
+              {/* Author Info */}
+              <div className="flex items-center space-x-3">
+                <div
+                  className={`w-12 h-12 rounded-full ${col.color} text-white font-headline text-sm font-bold flex items-center justify-center border-2 border-white dark:border-slate-800 shadow-xs shrink-0`}
+                >
+                  {col.initials}
+                </div>
                 <div>
-                  <h4 className="font-bold text-foreground text-sm">
-                    {col.author.name}
-                  </h4>
-                  <p className="text-xs text-muted-foreground line-clamp-1">
-                    {col.author.bio?.split(".")[0]}
+                  <h3 className="font-bold text-sm text-foreground">
+                    {col.name}
+                  </h3>
+                  <p className="text-[11px] text-amber-800 dark:text-amber-400 font-medium">
+                    {col.role}
                   </p>
                 </div>
               </div>
 
-              {/* Column Headline */}
-              <div>
-                <span className="inline-block rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground/80 mb-2">
-                  {col.topic}
-                </span>
-                <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
-                  &ldquo;{col.title}&rdquo;
-                </h3>
-                <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-                  {col.excerpt}
-                </p>
-              </div>
+              {/* Quote Headline */}
+              <blockquote className="font-headline italic text-sm text-slate-800 dark:text-slate-200 leading-relaxed pt-2">
+                {col.quote}
+              </blockquote>
+
+              {/* Summary Text */}
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-serif leading-relaxed">
+                {col.body}
+              </p>
             </div>
 
             {/* Read Column Link */}
-            <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-between text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
-              <span>Read Perspective</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </div>
-          </article>
+            <Link
+              href={col.href}
+              className="inline-flex items-center gap-1.5 mt-5 text-xs font-bold text-amber-800 dark:text-amber-400 hover:underline pt-2 border-t border-amber-200/50 dark:border-amber-800/30"
+            >
+              <span>Read Column</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
         ))}
       </div>
     </section>
