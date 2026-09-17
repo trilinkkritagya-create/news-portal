@@ -9,10 +9,11 @@ import {
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
-import { DashboardStats } from "@/lib/dashboard/get-dashboard-data";
+import { AuthorDashboardStats } from "@/lib/types/dashboard.types";
+// import { DashboardStats } from "@/lib/dashboard/get-dashboard-data";
 
 interface MetricCardsProps {
-  stats: DashboardStats;
+  stats: AuthorDashboardStats;
 }
 
 export default function MetricCards({ stats }: MetricCardsProps) {
@@ -143,13 +144,15 @@ export default function MetricCards({ stats }: MetricCardsProps) {
           </div>
           <div className="mt-1">
             <div className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
-              {formatViews(stats.totalViews)}
+              {/* {formatViews(stats.)} */}
             </div>
             <div className="flex items-center gap-1 mt-1 text-[11px]">
               <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-semibold gap-0.5">
                 <TrendingUp className="h-3.5 w-3.5" /> +24.1%
               </span>
-              <span className="text-muted-foreground">unique readers today</span>
+              <span className="text-muted-foreground">
+                unique readers today
+              </span>
             </div>
           </div>
         </div>

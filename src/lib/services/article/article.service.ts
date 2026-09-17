@@ -1,4 +1,4 @@
-import { UserRole } from "@/generated/prisma/enums";
+import { ArticleStatus, UserRole } from "@/generated/prisma/enums";
 
 import prisma from "@/lib/prisma";
 import { Errors } from "@/lib/errors/errors";
@@ -33,6 +33,10 @@ export interface updateArticleFeatureInput {
 export interface CreateCommentInput {
   articleId: string;
   content: string;
+}
+interface UpdateArticleStatusInput {
+  articleId: string;
+  status: ArticleStatus;
 }
 
 class ArticleService {
@@ -76,6 +80,84 @@ class ArticleService {
     } catch (error) {
       throw error;
     }
+  }
+  async updateArticleStatus(
+    data: UpdateArticleStatusInput,
+    user: AuthenticatedUser,
+  ) {
+    try {
+      if (user.role !== "ADMIN") {
+        throw Errors.forbidden(
+          "Only administrators can change article status.",
+          ErrorResource.ARTICLE,
+        );
+      }
+
+      const article = await prisma.article.findUnique({
+        where: {
+          id: data.articleId,
+        },
+        select: {
+          id: true,
+          status: true,
+        },
+      });
+
+      if (!article) {
+        throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
+      }
+
+      if (article.status === data.status) {
+        return article;
+      }
+
+      const updatedArticle = await prisma.article.update({
+        where: {
+          id: data.articleId,
+        },
+        data: {
+          status: data.status,
+
+          publishedAt: data.status === "PUBLISHED" ? new Date() : null,
+        },
+
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          status: true,
+          authorId: true,
+          categoryId: true,
+          allowLikes: true,
+          allowComments: true,
+          publishedAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return updatedArticle;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async publishArticle(articleId: string, user: AuthenticatedUser) {
+    return this.updateArticleStatus(
+      {
+        articleId,
+        status: "PUBLISHED",
+      },
+      user,
+    );
+  }
+  async unpublishArticle(articleId: string, user: AuthenticatedUser) {
+    return this.updateArticleStatus(
+      {
+        articleId,
+        status: "DRAFT",
+      },
+      user,
+    );
   }
   async updateArticle(
     articleId: string,
@@ -357,6 +439,3 @@ class ArticleService {
 }
 
 export const articleService = new ArticleService();
-
-
-

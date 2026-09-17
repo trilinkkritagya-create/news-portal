@@ -55,7 +55,8 @@ export default function HeroLeadSection({
       rank: 3,
       category: "Tech",
       color: "text-blue-600 dark:text-blue-400",
-      title: "Solid-State Battery Production Clears Commercial Gigafactory Milestone",
+      title:
+        "Solid-State Battery Production Clears Commercial Gigafactory Milestone",
       reads: "48.9k reads",
       time: "2h ago",
       id: storyTwo.id,
@@ -64,7 +65,8 @@ export default function HeroLeadSection({
       rank: 4,
       category: "Policy",
       color: "text-amber-600 dark:text-amber-400",
-      title: "European Union Adopts Stricter AI Attribution Mandates for Financial Media",
+      title:
+        "European Union Adopts Stricter AI Attribution Mandates for Financial Media",
       reads: "39.5k reads",
       time: "3h ago",
       id: storyOne.id,
@@ -73,7 +75,8 @@ export default function HeroLeadSection({
       rank: 5,
       category: "Markets",
       color: "text-emerald-600 dark:text-emerald-400",
-      title: "Bipartisan Antitrust Probe Subpoenas Cloud Infrastructure Duopoly",
+      title:
+        "Bipartisan Antitrust Probe Subpoenas Cloud Infrastructure Duopoly",
       reads: "31.0k reads",
       time: "4h ago",
       id: leadStory.id,
@@ -132,7 +135,6 @@ export default function HeroLeadSection({
             {leadStory.excerpt}
           </p>
 
-          {/* Lead Visual Image with Photojournalism Figcaption */}
           <figure className="group relative overflow-hidden rounded-lg bg-slate-900 aspect-[16/9] border border-border shadow-sm">
             <Image
               src={leadStory.featuredImage}
@@ -145,7 +147,8 @@ export default function HeroLeadSection({
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
             <figcaption className="absolute bottom-2.5 left-3.5 right-3.5 text-[11px] text-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 drop-shadow-md">
               <span className="truncate max-w-md">
-                Cryogenic benchmark calibration during high-throughput deployment test.
+                Cryogenic benchmark calibration during high-throughput
+                deployment test.
               </span>
               <span className="font-mono text-[10px] text-slate-300 shrink-0">
                 Dr. K. Arisawa / Quantum Optics Institute
@@ -153,7 +156,6 @@ export default function HeroLeadSection({
             </figcaption>
           </figure>
 
-          {/* Reporter Byline & Interactive Metadata Controls */}
           <div className="flex flex-wrap items-center justify-between pt-3 border-t border-border/80 gap-3 text-xs">
             <div className="flex items-center space-x-3">
               {leadStory.author.image ? (
@@ -179,7 +181,6 @@ export default function HeroLeadSection({
                 </p>
               </div>
             </div>
-
             <div className="flex items-center space-x-3 text-muted-foreground">
               <span className="flex items-center gap-1 text-[11px]">
                 <Clock className="h-3.5 w-3.5" />
@@ -189,13 +190,16 @@ export default function HeroLeadSection({
               <button
                 type="button"
                 onClick={() => setBookmarked(!bookmarked)}
-                className={`transition-colors p-1 rounded-md flex items-center gap-1 ${bookmarked
-                  ? "text-primary font-semibold"
-                  : "hover:text-primary"
-                  }`}
+                className={`transition-colors p-1 rounded-md flex items-center gap-1 ${
+                  bookmarked
+                    ? "text-primary font-semibold"
+                    : "hover:text-primary"
+                }`}
                 title={bookmarked ? "Bookmarked" : "Bookmark article"}
               >
-                <Bookmark className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`} />
+                <Bookmark
+                  className={`h-4 w-4 ${bookmarked ? "fill-current" : ""}`}
+                />
               </button>
               <button
                 type="button"
@@ -248,10 +252,10 @@ export default function HeroLeadSection({
               {storyOne.excerpt}
             </p>
             <p className="text-[11px] text-muted-foreground font-medium pt-1">
-              By <span className="text-foreground">{storyOne.author.name}</span> · Markets Desk
+              By <span className="text-foreground">{storyOne.author.name}</span>{" "}
+              · Markets Desk
             </p>
           </article>
-
           {/* Story 2: World Affairs */}
           <article className="space-y-2.5">
             <div className="flex items-center justify-between">
@@ -283,7 +287,8 @@ export default function HeroLeadSection({
               {storyTwo.excerpt}
             </p>
             <p className="text-[11px] text-muted-foreground font-medium pt-1">
-              By <span className="text-foreground">{storyTwo.author.name}</span> · Brussels Bureau
+              By <span className="text-foreground">{storyTwo.author.name}</span>{" "}
+              · Brussels Bureau
             </p>
           </article>
         </div>
@@ -339,7 +344,8 @@ export default function HeroLeadSection({
               <span>Chronicle FastWire</span>
             </p>
             <p className="text-[10px] leading-tight text-muted-foreground">
-              Delivering real-time institutional feeds to 14,000+ financial terminals daily.
+              Delivering real-time institutional feeds to 14,000+ financial
+              terminals daily.
             </p>
           </div>
         </aside>

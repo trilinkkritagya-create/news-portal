@@ -9,13 +9,13 @@ import {
   createArticleAction,
   CreateArticleState,
 } from "@/lib/actions/article/article.action";
+import { toast } from "sonner";
 
 export default function CreateArticlePage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [contentHtml, setContentHtml] = useState("");
-  const [loading, setLoading] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [spellCheck, setSpellCheck] = useState(true);
@@ -31,43 +31,14 @@ export default function CreateArticlePage() {
     readTimeMinutes: 1,
   });
 
-  // Handle article submission (Publish)
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!title.trim() || !contentHtml.trim()) {
-      setError("Article title and body content are required.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/articles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          content: contentHtml,
-          excerpt: excerpt.trim() || undefined,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || "Failed to create article.");
-      }
-      router.push("/dashboard");
-      router.refresh();
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "An error occurred while saving article.",
-      );
-    } finally {
-      setLoading(false);
-    }
+  const initialSate: CreateArticleState = {
+    success: false,
   };
+  const [state, formAction, isPending] = useActionState(
+    createArticleAction,
+    initialSate,
+  );
 
-  // Quick-save / Save Draft handler
   const handleSaveDraft = useCallback(() => {
     if (!title.trim()) {
       setError("Please add at least a title before saving a draft.");
@@ -75,7 +46,6 @@ export default function CreateArticlePage() {
     }
     setError(null);
     setDraftSaved(true);
-    // Persist draft to localStorage for recovery
     try {
       localStorage.setItem(
         "draft_article",
@@ -105,6 +75,17 @@ export default function CreateArticlePage() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [handleSaveDraft]);
+
+  useEffect(() => {
+    if (state.success) {
+      toast.success(state.message ?? "Article created successfully");
+      router.refresh();
+      return;
+    }
+    if (state.error) {
+      toast.error(state.error.message);
+    }
+  }, [state, router]);
 
   return (
     <div className="flex flex-1 flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 sm:pb-6">
@@ -152,11 +133,11 @@ export default function CreateArticlePage() {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>{draftSaved ? "Saved" : "Autosaved"}</span>
             </span>
-
             <button
-              type="button"
-              disabled={loading}
-              onClick={() => handleSubmit()}
+              type="submit"
+              form="create-article-form"
+              disabled={isPending}
+              //   onClick={() => handleSubmit()}
               className="inline-flex items-center justify-center gap-1 bg-indigo-900 hover:bg-indigo-950 active:scale-95 text-white font-semibold text-xs px-2.5 py-1.5 rounded-md shadow-xs transition cursor-pointer disabled:opacity-50"
             >
               <svg
@@ -165,7 +146,7 @@ export default function CreateArticlePage() {
               >
                 <path d="M5.5 3.5l14 8.5-14 8.5v-17z"></path>
               </svg>
-              <span>{loading ? "..." : "Publish"}</span>
+              <span>{isPending ? "..." : "Publish"}</span>
             </button>
 
             <div className="relative">
@@ -271,15 +252,16 @@ export default function CreateArticlePage() {
             {/* Split Publish Button Group */}
             <div className="relative inline-flex rounded-md shadow-2xs">
               <button
-                type="button"
-                disabled={loading}
-                onClick={() => handleSubmit()}
+                type="submit"
+                form="create-article-form"
+                disabled={isPending}
+                // onClick={() => handleSubmit()}
                 className="inline-flex items-center gap-1.5 bg-indigo-900 hover:bg-indigo-950 text-white text-xs font-medium tracking-wide uppercase px-3.5 py-1.5 rounded-l-md transition cursor-pointer disabled:opacity-50"
               >
                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
                   <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                 </svg>
-                <span>{loading ? "Publishing..." : "Publish"}</span>
+                <span>{isPending ? "Publishing..." : "Publish"}</span>
               </button>
               <button
                 type="button"
@@ -306,11 +288,8 @@ export default function CreateArticlePage() {
               {showPublishMenu && (
                 <div className="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1.5 z-50 text-xs text-slate-700 dark:text-slate-200">
                   <button
-                    type="button"
-                    onClick={() => {
-                      setShowPublishMenu(false);
-                      handleSubmit();
-                    }}
+                    type="submit"
+                    form="create-article-form"
                     className="w-full text-left px-3.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-between cursor-pointer"
                   >
                     <span>Publish Immediately</span>
@@ -415,130 +394,124 @@ export default function CreateArticlePage() {
           data-purpose="article-editor"
         >
           <div className="max-w-4xl mx-auto space-y-7">
-            {/* Error Alert */}
-            {error && (
+            {/* {state.error && (
               <div className="p-3.5 rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 text-xs font-medium flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span>⚠️</span>
-                  <span>{error}</span>
+                  <span>{state.error.message}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setError(null)}
-                  className="text-rose-700 dark:text-rose-300 hover:underline text-[11px] cursor-pointer font-bold"
-                >
-                  Dismiss
-                </button>
               </div>
-            )}
+            )} */}
 
             {/* Headline Section */}
-            <div className="space-y-2" data-purpose="headline-input-group">
-              <div className="flex items-center justify-between text-xs">
-                <label
-                  htmlFor="article-title"
-                  className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300"
-                >
-                  Article Title <span className="text-rose-500">*</span>
-                </label>
-                <span className="text-[11px] text-slate-400 font-sans">
-                  Headline •{" "}
-                  <span className="font-medium text-slate-600 dark:text-slate-300">
-                    {title.length} chars
+            <form id="create-article-form" action={formAction}>
+              <div className="space-y-2" data-purpose="headline-input-group">
+                <div className="flex items-center justify-between text-xs">
+                  <label
+                    htmlFor="article-title"
+                    className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300"
+                  >
+                    Article Title <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[11px] text-slate-400 font-sans">
+                    Headline •{" "}
+                    <span className="font-medium text-slate-600 dark:text-slate-300">
+                      {title.length} chars
+                    </span>
                   </span>
-                </span>
+                </div>
+                <div className="relative bg-white dark:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow-2xs hover:border-slate-400 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600 transition-all">
+                  <input
+                    id="article-title"
+                    className="w-full px-4 py-3 sm:py-3.5 bg-transparent border-0 rounded-lg text-slate-900 dark:text-slate-100 font-serif text-xl sm:text-2xl font-normal outline-none focus:outline-none focus:ring-0 placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-serif placeholder:font-normal tracking-tight transition"
+                    placeholder="e.g. The Renaissance of Modern Typography in Journalism..."
+                    type="text"
+                    value={title}
+                    name="title"
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="relative bg-white dark:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow-2xs hover:border-slate-400 focus-within:border-indigo-600 focus-within:ring-1 focus-within:ring-indigo-600 transition-all">
-                <input
-                  id="article-title"
-                  className="w-full px-4 py-3 sm:py-3.5 bg-transparent border-0 rounded-lg text-slate-900 dark:text-slate-100 font-serif text-xl sm:text-2xl font-normal outline-none focus:outline-none focus:ring-0 placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-serif placeholder:font-normal tracking-tight transition"
-                  placeholder="e.g. The Renaissance of Modern Typography in Journalism..."
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+
+              <div className="space-y-2" data-purpose="summary-excerpt-section">
+                <div className="flex items-center justify-between text-xs">
+                  <label
+                    htmlFor="article-excerpt"
+                    className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300"
+                  >
+                    Short Excerpt / Summary
+                  </label>
+                  <span
+                    className={cn(
+                      "font-mono text-[11px]",
+                      excerpt.length > 500
+                        ? "text-rose-500 font-bold"
+                        : "text-slate-400",
+                    )}
+                  >
+                    <span className="font-medium text-slate-600 dark:text-slate-300">
+                      {excerpt.length}
+                    </span>{" "}
+                    / 500
+                  </span>
+                </div>
+                <textarea
+                  id="article-excerpt"
+                  className="w-full text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-3.5 outline-none focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 resize-none leading-relaxed placeholder:text-slate-400 shadow-2xs transition"
+                  placeholder="Brief summary for social preview cards, syndicated feeds, and news digests..."
+                  rows={2}
+                  maxLength={500}
+                  value={excerpt}
+                  name="excerpt"
+                  onChange={(e) => setExcerpt(e.target.value)}
                 />
               </div>
-            </div>
-
-            {/* Short Excerpt / Summary Section */}
-            <div className="space-y-2" data-purpose="summary-excerpt-section">
-              <div className="flex items-center justify-between text-xs">
-                <label
-                  htmlFor="article-excerpt"
-                  className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300"
-                >
-                  Short Excerpt / Summary
-                </label>
-                <span
-                  className={cn(
-                    "font-mono text-[11px]",
-                    excerpt.length > 500
-                      ? "text-rose-500 font-bold"
-                      : "text-slate-400",
-                  )}
-                >
-                  <span className="font-medium text-slate-600 dark:text-slate-300">
-                    {excerpt.length}
-                  </span>{" "}
-                  / 500
-                </span>
-              </div>
-              <textarea
-                id="article-excerpt"
-                className="w-full text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-3.5 outline-none focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 resize-none leading-relaxed placeholder:text-slate-400 shadow-2xs transition"
-                placeholder="Brief summary for social preview cards, syndicated feeds, and news digests..."
-                rows={2}
-                maxLength={500}
-                value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-              />
-            </div>
-
-            {/* Article Body Section */}
-            <div className="space-y-2" data-purpose="article-body-editor">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                  Article Body <span className="text-rose-500">*</span>
-                </label>
-                {/* Spellcheck toggle */}
-                <label className="inline-flex items-center cursor-pointer gap-2 select-none">
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    Spellcheck
-                  </span>
-                  <button
-                    aria-checked={spellCheck}
-                    className={`w-8 h-4 rounded-full relative transition-colors focus:outline-none cursor-pointer ${
-                      spellCheck
-                        ? "bg-emerald-500"
-                        : "bg-slate-300 dark:bg-slate-700"
-                    }`}
-                    role="switch"
-                    type="button"
-                    onClick={() => setSpellCheck(!spellCheck)}
-                    title={
-                      spellCheck ? "Disable spellcheck" : "Enable spellcheck"
-                    }
-                  >
-                    <span
-                      className={`block w-3.5 h-3.5 bg-white rounded-full shadow-xs transform transition-transform ${
-                        spellCheck ? "translate-x-4" : "translate-x-0.5"
+              <div className="space-y-2" data-purpose="article-body-editor">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                    Article Body <span className="text-rose-500">*</span>
+                  </label>
+                  {/* Spellcheck toggle */}
+                  <label className="inline-flex items-center cursor-pointer gap-2 select-none">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                      Spellcheck
+                    </span>
+                    <button
+                      aria-checked={spellCheck}
+                      className={`w-8 h-4 rounded-full relative transition-colors focus:outline-none cursor-pointer ${
+                        spellCheck
+                          ? "bg-emerald-500"
+                          : "bg-slate-300 dark:bg-slate-700"
                       }`}
-                    ></span>
-                  </button>
-                </label>
-              </div>
+                      role="switch"
+                      type="button"
+                      onClick={() => setSpellCheck(!spellCheck)}
+                      title={
+                        spellCheck ? "Disable spellcheck" : "Enable spellcheck"
+                      }
+                    >
+                      <span
+                        className={`block w-3.5 h-3.5 bg-white rounded-full shadow-xs transform transition-transform ${
+                          spellCheck ? "translate-x-4" : "translate-x-0.5"
+                        }`}
+                      ></span>
+                    </button>
+                  </label>
+                </div>
 
-              {/* Rich Editor Canvas with Ribbon Toolbar & Live Stats */}
-              <RichTextEditor
-                initialValue={contentHtml}
-                spellCheckEnabled={spellCheck}
-                onToggleSpellCheck={() => setSpellCheck(!spellCheck)}
-                onChange={setContentHtml}
-                onStatsChange={setEditorStats}
-                onQuickSave={handleSaveDraft}
-                placeholder="Start drafting your editorial piece here. Format with headings, quotes, and styling using the ribbon toolbar above..."
-              />
-            </div>
+                {/* Rich Editor Canvas with Ribbon Toolbar & Live Stats */}
+                <RichTextEditor
+                  initialValue={contentHtml}
+                  spellCheckEnabled={spellCheck}
+                  onToggleSpellCheck={() => setSpellCheck(!spellCheck)}
+                  onChange={setContentHtml}
+                  onStatsChange={setEditorStats}
+                  onQuickSave={handleSaveDraft}
+                  placeholder="Start drafting your editorial piece here. Format with headings, quotes, and styling using the ribbon toolbar above..."
+                />
+                <input type="hidden" name="content" value={contentHtml} />
+              </div>
+            </form>
           </div>
         </main>
 
@@ -816,15 +789,6 @@ export default function CreateArticlePage() {
           </div>
         </div>
       )}
-      {/* ── END: Preview Modal ── */}
     </div>
   );
 }
-// import CreateArticlePage from "@/lib/criticalMethods/CreateArticleAction";
-// import React from "react";
-
-// const CreateArticle = () => {
-//   return <CreateArticlePage />;
-// };
-
-// export default CreateArticle;

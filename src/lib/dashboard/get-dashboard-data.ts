@@ -54,7 +54,7 @@ export interface DashboardData {
   categories: CategoryDistributionItem[];
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
+export const CATEGORY_COLORS: Record<string, string> = {
   technology: "#7c3aed",
   "world-politics": "#2563eb",
   "business-markets": "#059669",
@@ -68,9 +68,8 @@ export async function getDashboardData(
   userRole?: UserRole,
   userId?: string,
 ): Promise<DashboardData> {
-/* eslint-enable @typescript-eslint/no-unused-vars */
+  /* eslint-enable @typescript-eslint/no-unused-vars */
   try {
-    // Attempt live Prisma ORM queries
     const [
       totalArticles,
       publishedArticles,
@@ -115,36 +114,41 @@ export async function getDashboardData(
 
     if (totalArticles > 0 || recentArticlesPrisma.length > 0) {
       const calculatedTotal = totalArticles || 1;
-      const categoryDistribution: CategoryDistributionItem[] = categoriesWithCount.map((cat) => {
-        const count = cat._count.articles;
-        const percentage = Math.round((count / calculatedTotal) * 100);
-        return {
-          name: cat.name,
-          slug: cat.slug,
-          count,
-          percentage,
-          color: CATEGORY_COLORS[cat.slug] || "#1e3a8a",
-        };
-      });
+      const categoryDistribution: CategoryDistributionItem[] =
+        categoriesWithCount.map((cat) => {
+          const count = cat._count.articles;
+          const percentage = Math.round((count / calculatedTotal) * 100);
+          return {
+            name: cat.name,
+            slug: cat.slug,
+            count,
+            percentage,
+            color: CATEGORY_COLORS[cat.slug] || "#1e3a8a",
+          };
+        });
 
-      const recentArticles: DashboardArticleItem[] = recentArticlesPrisma.map((art) => ({
-        id: art.id,
-        title: art.title,
-        slug: art.slug,
-        excerpt: art.excerpt,
-        status: art.status as "DRAFT" | "PUBLISHED" | "ARCHIVED",
-        categoryName: art.category?.name || "General Desk",
-        categorySlug: art.category?.slug,
-        categoryColor: art.category?.slug ? CATEGORY_COLORS[art.category.slug] : "#1e3a8a",
-        authorName: art.author?.name || "Chronicle Staff",
-        authorEmail: art.author?.email,
-        authorImage: art.author?.image,
-        views: 1250, // Calculated/synthetic telemetry
-        likesCount: art._count.likes,
-        commentsCount: art._count.comments,
-        publishedAt: art.publishedAt?.toISOString() || null,
-        createdAt: art.createdAt.toISOString(),
-      }));
+      const recentArticles: DashboardArticleItem[] = recentArticlesPrisma.map(
+        (art) => ({
+          id: art.id,
+          title: art.title,
+          slug: art.slug,
+          excerpt: art.excerpt,
+          status: art.status as "DRAFT" | "PUBLISHED" | "ARCHIVED",
+          categoryName: art.category?.name || "General Desk",
+          categorySlug: art.category?.slug,
+          categoryColor: art.category?.slug
+            ? CATEGORY_COLORS[art.category.slug]
+            : "#1e3a8a",
+          authorName: art.author?.name || "Chronicle Staff",
+          authorEmail: art.author?.email,
+          authorImage: art.author?.image,
+          views: 1250, // Calculated/synthetic telemetry
+          likesCount: art._count.likes,
+          commentsCount: art._count.comments,
+          publishedAt: art.publishedAt?.toISOString() || null,
+          createdAt: art.createdAt.toISOString(),
+        }),
+      );
 
       return {
         stats: {
@@ -167,21 +171,22 @@ export async function getDashboardData(
     // Database offline or during early prototyping: fallback gracefully to schema mock data
   }
 
-  // Fallback to rich mock data matching schema
   const articles: MockArticle[] = MOCK_ARTICLES;
   const categoriesList = MOCK_CATEGORIES;
   const totalArt = MOCK_ADMIN_DASHBOARD.stats.totalArticles;
 
-  const categoryDistribution: CategoryDistributionItem[] = categoriesList.map((cat) => {
-    const percentage = Math.round((cat.articleCount / totalArt) * 100);
-    return {
-      name: cat.name,
-      slug: cat.slug,
-      count: cat.articleCount,
-      percentage,
-      color: cat.color || CATEGORY_COLORS[cat.slug] || "#1e3a8a",
-    };
-  });
+  const categoryDistribution: CategoryDistributionItem[] = categoriesList.map(
+    (cat) => {
+      const percentage = Math.round((cat.articleCount / totalArt) * 100);
+      return {
+        name: cat.name,
+        slug: cat.slug,
+        count: cat.articleCount,
+        percentage,
+        color: cat.color || CATEGORY_COLORS[cat.slug] || "#1e3a8a",
+      };
+    },
+  );
 
   const recentArticles: DashboardArticleItem[] = articles.map((art) => ({
     id: art.id,
@@ -237,7 +242,8 @@ export interface MemberDashboardData {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getMemberDashboardData(userId?: string): Promise<MemberDashboardData> {
+export async function getMemberDashboardData(): Promise<MemberDashboardData> {
+  // userId?: string,
   // If needed in the future, query database for user bookmarks, history, etc.
   return {
     stats: MOCK_MEMBER_DASHBOARD.stats,
@@ -246,4 +252,3 @@ export async function getMemberDashboardData(userId?: string): Promise<MemberDas
     recommendedForYou: MOCK_MEMBER_DASHBOARD.recommendedForYou,
   };
 }
-

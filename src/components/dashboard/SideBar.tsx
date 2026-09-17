@@ -49,7 +49,12 @@ interface NavItem {
   badgeType?: "default" | "alert";
 }
 
-function SidebarContent({ role, user, isMobile, onClose }: SidebarContentProps) {
+function SidebarContent({
+  role,
+  user,
+  isMobile,
+  onClose,
+}: SidebarContentProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
@@ -88,7 +93,7 @@ function SidebarContent({ role, user, isMobile, onClose }: SidebarContentProps) 
         href: "/dashboard/users",
         label: "Users",
         icon: Users,
-      }
+      },
     );
   }
 
@@ -111,7 +116,7 @@ function SidebarContent({ role, user, isMobile, onClose }: SidebarContentProps) 
         href: "/dashboard#reading-history",
         label: "Reading History",
         icon: History,
-      }
+      },
     );
   }
 
@@ -217,7 +222,8 @@ function SidebarContent({ role, user, isMobile, onClose }: SidebarContentProps) 
               </span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-snug">
-              AP &amp; Reuters terminal live sync active. All economic desk dispatches queued.
+              AP &amp; Reuters terminal live sync active. All economic desk
+              dispatches queued.
             </p>
           </div>
         )}

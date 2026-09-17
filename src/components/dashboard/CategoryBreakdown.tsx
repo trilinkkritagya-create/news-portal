@@ -1,4 +1,7 @@
-import { CategoryDistributionItem } from "@/lib/dashboard/get-dashboard-data";
+// import { CategoryDistributionItem } from "@/lib/dashboard/get-dashboard-data";
+
+import { getCategoryColor } from "@/lib/constants/extra";
+import { CategoryDistributionItem } from "@/lib/types/dashboard.types";
 
 interface CategoryBreakdownProps {
   categories: CategoryDistributionItem[];
@@ -7,6 +10,7 @@ interface CategoryBreakdownProps {
 export default function CategoryBreakdown({
   categories,
 }: CategoryBreakdownProps) {
+  console.log(categories, "is categories");
   return (
     <div className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs">
       {/* Header */}
@@ -25,33 +29,38 @@ export default function CategoryBreakdown({
 
       {/* Progress Bars */}
       <div className="space-y-3">
-        {categories.map((cat) => (
-          <div key={cat.slug}>
-            <div className="flex justify-between items-center text-xs mb-1">
-              <span className="font-medium text-foreground flex items-center gap-1.5 text-[11px]">
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: cat.color || "#1e3a8a" }}
-                />
-                {cat.name}
-              </span>
-              <span className="font-mono text-muted-foreground text-[11px] font-semibold">
-                {cat.percentage}%{" "}
-                <span className="font-normal text-[10px]">({cat.count})</span>
-              </span>
-            </div>
+        {categories.map((cat) => {
+          const categoryColor = getCategoryColor(cat.slug);
+          return (
+            <div key={cat.slug}>
+              <div className="flex justify-between items-center text-xs mb-1">
+                <span className="font-medium text-foreground flex items-center gap-1.5 text-[11px]">
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: categoryColor || "#1e3a8a" }}
+                  />
+                  {cat.name}
+                </span>
+                <span className="font-mono text-muted-foreground text-[11px] font-semibold">
+                  {/* {cat.percentage}%{" "} */}
+                  <span className="font-normal text-[10px]">
+                    ({cat._count.articles})
+                  </span>
+                </span>
+              </div>
 
-            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.max(cat.percentage, 5)}%`,
-                  backgroundColor: cat.color || "#1e3a8a",
-                }}
-              />
+              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  // style={{
+                  //   width: `${Math.max(cat.percentage, 5)}%`,
+                  //   backgroundColor: cat.color || "#1e3a8a",
+                  // }}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Bottom Telemetry */}

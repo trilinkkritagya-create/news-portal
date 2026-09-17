@@ -3,15 +3,10 @@
 import Link from "next/link";
 import { History, CheckCircle2, Clock3 } from "lucide-react";
 import { MockArticle } from "@/lib/mock-data";
-
-interface ReadingHistoryItem {
-  article: MockArticle;
-  readAt: string;
-  progress: string;
-}
+import { MemberReadingHistoryItem } from "@/lib/types/dashboard.types";
 
 interface MemberReadingHistoryProps {
-  history: ReadingHistoryItem[];
+  history: MemberReadingHistoryItem[];
 }
 
 export default function MemberReadingHistory({
@@ -39,7 +34,8 @@ export default function MemberReadingHistory({
       <div className="divide-y divide-border">
         {history.map((item, idx) => {
           const isComplete = item.progress === "100%";
-          const progressPercent = parseInt(item.progress.replace("%", ""), 10) || 0;
+          const progressPercent =
+            parseInt(item.progress.replace("%", ""), 10) || 0;
 
           return (
             <div
@@ -48,16 +44,18 @@ export default function MemberReadingHistory({
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span
-                    className="border px-1.5 py-0.5 font-mono text-[9px] uppercase font-bold tracking-wider rounded-xs"
-                    style={{
-                      borderColor: `${item.article.category.color}40`,
-                      backgroundColor: `${item.article.category.color}15`,
-                      color: item.article.category.color,
-                    }}
-                  >
-                    {item.article.category.name}
-                  </span>
+                  {item.article.category && (
+                    <span
+                      className="border px-1.5 py-0.5 font-mono text-[9px] uppercase font-bold tracking-wider rounded-xs"
+                      style={{
+                        borderColor: `${item.article.category.color}40`,
+                        backgroundColor: `${item.article.category.color}15`,
+                        color: item.article.category.color,
+                      }}
+                    >
+                      {item.article.category.name}
+                    </span>
+                  )}
                   <span className="text-[11px] font-mono text-muted-foreground flex items-center gap-1">
                     <Clock3 className="h-3 w-3" />
                     {item.readAt}

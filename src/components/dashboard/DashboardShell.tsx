@@ -25,7 +25,6 @@ export default function DashboardShell({
       <div className="flex h-screen w-full overflow-hidden bg-background text-foreground antialiased">
         {/* Static, pinned sidebar that never scrolls away */}
         <SideBar role={role} user={user} />
-
         {/* Independent scrollable main viewport */}
         <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
           {children}

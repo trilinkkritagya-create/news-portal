@@ -27,11 +27,9 @@ export default function EditArticlePage() {
         setFetching(true);
         const res = await fetch(`/api/articles/${id}`);
         const json = await res.json();
-
         if (!res.ok || !json.success) {
           throw new Error(json.error?.message || "Failed to load article.");
         }
-
         const article = json.data.article;
         setTitle(article.title || "");
         setExcerpt(article.excerpt || "");

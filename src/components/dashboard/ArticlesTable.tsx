@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import Link from "next/link";
 import {
   ChevronDown,
@@ -11,44 +11,62 @@ import {
   ExternalLink,
   PenTool,
 } from "lucide-react";
-import { DashboardArticleItem } from "@/lib/dashboard/get-dashboard-data";
+// import { DashboardArticleItem } from "@/lib/dashboard/get-dashboard-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DashboardArticleItem } from "@/lib/types/dashboard.types";
+import { CATEGORY_COLORS } from "@/lib/constants/extra";
+import { updateArticleStatusAction } from "@/lib/actions/article/article.action";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Send } from "lucide-react";
+import { ArticleStatus } from "@/generated/prisma/enums";
+import Tooltip from "../ui/tooltip";
+
+// import { DashboardArticleItem } from "@/lib/dashboard/get-dashboard-data";
 
 const INITIAL_PAGE_SIZE = 8;
 
 interface ArticlesTableProps {
   articles: DashboardArticleItem[];
 }
-
 export default function ArticlesTable({ articles }: ArticlesTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
+  const [changingStatusArticleId, setChangingStatusArticleId] = useState<
+    string | null
+  >(null);
+  const [isPublishing, startPublishing] = useTransition();
+  const router = useRouter();
 
-  // Extract unique categories for dropdown filter
   const categoryOptions = useMemo(() => {
     const map = new Map<string, string>();
-    articles.forEach((a) => {
-      if (a.categoryName) {
-        map.set(a.categoryName, a.categoryName);
+
+    articles.forEach((article) => {
+      if (article.category) {
+        map.set(article.category.slug, article.category.name);
       }
     });
-    return Array.from(map.values());
+
+    return Array.from(map.entries());
   }, [articles]);
 
   const filteredArticles = useMemo(() => {
     return articles.filter((article) => {
       const matchesSearch =
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.authorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.categoryName.toLowerCase().includes(searchQuery.toLowerCase());
-
+        (article.author?.name ?? "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (article.category?.name ?? "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
       const matchesStatus =
         statusFilter === "ALL" || article.status === statusFilter;
 
       const matchesCategory =
-        categoryFilter === "ALL" || article.categoryName === categoryFilter;
+        categoryFilter === "ALL" || article.category?.slug === categoryFilter;
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
@@ -58,6 +76,35 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
     return filteredArticles.slice(0, visibleCount);
   }, [filteredArticles, visibleCount]);
 
+  const handleStatusChange = (
+    articleId: string,
+    status: "DRAFT" | "PUBLISHED",
+  ) => {
+    setChangingStatusArticleId(articleId);
+
+    startPublishing(async () => {
+      try {
+        const result = await updateArticleStatusAction(articleId, status);
+        if (!result.success) {
+          toast.error(result.message);
+          return;
+        }
+        if (status === ArticleStatus.PUBLISHED) {
+          toast.success("Article published successfully.");
+        } else {
+          toast.success("Article unpublished successfully.");
+        }
+
+        router.refresh();
+      } finally {
+        setChangingStatusArticleId(null);
+      }
+    });
+  };
+
+  const getCategoryColor = (slug?: string | null) => {
+    return CATEGORY_COLORS[slug ?? ""] ?? "#64748b";
+  };
   const renderStatusBadge = (status: string) => {
     if (status === "PUBLISHED") {
       return (
@@ -84,7 +131,7 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl shadow-2xs overflow-hidden h-full flex flex-col justify-between flex-1">
+    <div className="bg-card border border-border overflow-visible rounded-xl shadow-2xs  h-full flex flex-col justify-between flex-1">
       {/* Table Header Toolbar */}
       <div className="p-4 sm:p-5 border-b border-border flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-card shrink-0">
         <div>
@@ -100,7 +147,6 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
             Dispatches published and staged across all regional desks
           </p>
         </div>
-
         {/* Toolbar Controls */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Desks / Categories Filter */}
@@ -111,9 +157,9 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
               className="appearance-none bg-slate-50 dark:bg-slate-900 border border-border text-xs font-medium text-foreground py-1.5 pl-2.5 pr-7 rounded focus:outline-none focus:border-primary cursor-pointer font-sans"
             >
               <option value="ALL">All Desks</option>
-              {categoryOptions.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat} Desk
+              {categoryOptions.map(([slug, name]) => (
+                <option key={slug} value={slug}>
+                  {name} Desk
                 </option>
               ))}
             </select>
@@ -161,7 +207,7 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
       {/* ========================================================================= */}
       {/* 1. DESKTOP & TABLET VIEW: Crisp Editorial Data Table (sm:block)          */}
       {/* ========================================================================= */}
-      <div className="hidden sm:block overflow-x-auto no-scrollbar flex-1">
+      <div className="hidden sm:block overflow-x-auto overflow-y-visible no-scrollbar flex-1">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-border bg-slate-50/75 dark:bg-slate-900/50 text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
@@ -197,6 +243,9 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
               </tr>
             ) : (
               displayedArticles.map((article) => {
+                const isThisArticlePublishing =
+                  changingStatusArticleId === article.id;
+
                 const formattedDate = article.publishedAt
                   ? new Date(article.publishedAt).toLocaleDateString("en-US", {
                       month: "short",
@@ -212,13 +261,13 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                     });
 
                 const authorInitial = (
-                  article.authorName?.[0] || "A"
+                  article.author?.name?.[0] || "A"
                 ).toUpperCase();
 
                 return (
                   <tr
                     key={article.id}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors group"
+                    className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors "
                   >
                     {/* Status */}
                     <td className="py-3 pl-4 pr-2 whitespace-nowrap">
@@ -233,29 +282,26 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                       >
                         {article.title}
                       </Link>
-                      {article.excerpt ? (
-                        <div className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
-                          {article.excerpt}
-                        </div>
-                      ) : (
-                        <div className="text-[10px] font-mono text-muted-foreground/60 mt-0.5">
-                          ID #{article.id.slice(-6).toUpperCase()}
-                        </div>
-                      )}
                     </td>
 
                     {/* Category */}
                     <td className="py-3 px-3 whitespace-nowrap">
-                      <span
-                        className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border"
-                        style={{
-                          borderColor: `${article.categoryColor || "#1e3a8a"}40`,
-                          backgroundColor: `${article.categoryColor || "#1e3a8a"}15`,
-                          color: article.categoryColor || "#1e3a8a",
-                        }}
-                      >
-                        {article.categoryName}
-                      </span>
+                      {article.category ? (
+                        <span
+                          className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border"
+                          style={{
+                            borderColor: `${getCategoryColor(article.category.slug)}40`,
+                            backgroundColor: `${getCategoryColor(article.category.slug)}15`,
+                            color: getCategoryColor(article.category.slug),
+                          }}
+                        >
+                          {article.category.name}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground">
+                          Uncategorized
+                        </span>
+                      )}
                     </td>
 
                     {/* Author */}
@@ -267,7 +313,7 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                           </AvatarFallback>
                         </Avatar>
                         <span className="font-medium text-foreground text-xs">
-                          {article.authorName}
+                          {article.author?.name}
                         </span>
                       </div>
                     </td>
@@ -277,24 +323,68 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                       {formattedDate}
                     </td>
 
-                    {/* Actions */}
                     <td className="py-3 pl-2 pr-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
-                        <Link
-                          href={`/dashboard/articles/edit/${article.id}`}
-                          className="p-1 text-muted-foreground hover:text-primary transition-colors rounded hover:bg-muted"
-                          title="Edit Article"
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Link>
-                        <Link
-                          href={`/articles/${article.slug}`}
-                          target="_blank"
-                          className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted"
-                          title="Preview Live"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </Link>
+                        <Tooltip content="Edit Article" position="top">
+                          <Link
+                            href={`/dashboard/articles/edit/${article.id}`}
+                            className="p-1 text-muted-foreground hover:text-primary transition-colors rounded hover:bg-muted"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Link>
+                        </Tooltip>
+
+                        {/* Publish - ADMIN only */}
+                        {article.status === ArticleStatus.DRAFT ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleStatusChange(
+                                article.id,
+                                ArticleStatus.PUBLISHED,
+                              )
+                            }
+                            disabled={isPublishing}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/70 transition-colors text-[10px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Publish Article"
+                          >
+                            <Send className="h-3 w-3" />
+
+                            {isThisArticlePublishing
+                              ? "Publishing..."
+                              : "Publish"}
+                          </button>
+                        ) : article.status === ArticleStatus.PUBLISHED ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleStatusChange(
+                                article.id,
+                                ArticleStatus.DRAFT,
+                              )
+                            }
+                            disabled={isPublishing}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/70 transition-colors text-[10px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Unpublish Article"
+                          >
+                            <Send className="h-3 w-3 rotate-180" />
+
+                            {isThisArticlePublishing
+                              ? "Unpublishing..."
+                              : "Unpublish"}
+                          </button>
+                        ) : null}
+
+                        {/* Preview */}
+                        <Tooltip content="Preview Live" position="top">
+                          <Link
+                            href={`/articles/${article.slug}`}
+                            target="_blank"
+                            className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Link>
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>
@@ -335,16 +425,22 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                 <div className="flex items-center justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2">
                     {renderStatusBadge(article.status)}
-                    <span
-                      className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border"
-                      style={{
-                        borderColor: `${article.categoryColor || "#1e3a8a"}40`,
-                        backgroundColor: `${article.categoryColor || "#1e3a8a"}15`,
-                        color: article.categoryColor || "#1e3a8a",
-                      }}
-                    >
-                      {article.categoryName}
-                    </span>
+                    {article.category ? (
+                      <span
+                        className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border"
+                        style={{
+                          borderColor: `${getCategoryColor(article.category.slug)}40`,
+                          backgroundColor: `${getCategoryColor(article.category.slug)}15`,
+                          color: getCategoryColor(article.category.slug),
+                        }}
+                      >
+                        {article.category.name}
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-muted-foreground">
+                        Uncategorized
+                      </span>
+                    )}
                   </div>
                   <span className="text-[10px] font-mono text-muted-foreground">
                     {formattedDate}
@@ -362,7 +458,7 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                 {/* Author + Quick Action */}
                 <div className="flex items-center justify-between mt-2 pt-1 text-xs text-muted-foreground">
                   <span className="font-medium text-foreground text-[11px]">
-                    {article.authorName}
+                    {article.author?.name}
                   </span>
                   <div className="flex items-center gap-3">
                     <Link
@@ -411,16 +507,17 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
           )}
-          {visibleCount >= filteredArticles.length && filteredArticles.length > INITIAL_PAGE_SIZE && (
-            <button
-              type="button"
-              onClick={() => setVisibleCount(INITIAL_PAGE_SIZE)}
-              className="inline-flex items-center gap-1 px-3 py-1 border border-border rounded bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs transition-colors cursor-pointer"
-            >
-              <span>Show Less</span>
-              <ChevronUp className="h-3 w-3" />
-            </button>
-          )}
+          {visibleCount >= filteredArticles.length &&
+            filteredArticles.length > INITIAL_PAGE_SIZE && (
+              <button
+                type="button"
+                onClick={() => setVisibleCount(INITIAL_PAGE_SIZE)}
+                className="inline-flex items-center gap-1 px-3 py-1 border border-border rounded bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs transition-colors cursor-pointer"
+              >
+                <span>Show Less</span>
+                <ChevronUp className="h-3 w-3" />
+              </button>
+            )}
         </div>
       </div>
     </div>
