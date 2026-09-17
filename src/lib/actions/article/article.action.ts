@@ -10,6 +10,7 @@ import {
   createCommentSchema,
   updateArticleFeatureSchema,
   updateArticleSchema,
+  updateArticleStatusSchema,
 } from "@/lib/validation/article-schema";
 
 export type CreateArticleState = {
@@ -69,6 +70,10 @@ export type UpdateArticleFeaturesState = {
     };
   };
 };
+export type PublishArticleActionState = {
+  success: boolean;
+  message?: string;
+};
 
 export type LikeArticleState = {
   success: boolean;
@@ -116,6 +121,7 @@ export async function createArticleAction(
 ): Promise<CreateArticleState> {
   try {
     const user = await requireAuth();
+    console.log("User in createArticleAction:", user);
     const result = createArticleSchema.safeParse({
       title: formData.get("title"),
       content: formData.get("content"),
@@ -150,6 +156,112 @@ export async function createArticleAction(
     return {
       success: false,
       error: handleError(appError),
+    };
+  }
+}
+
+export async function publishArticleAction(
+  articleId: string,
+): Promise<PublishArticleActionState> {
+  try {
+    const user = await requireAuth();
+
+    if (user.role !== "ADMIN") {
+      return {
+        success: false,
+        message: "Only administrators can publish articles.",
+      };
+    }
+
+    await articleService.publishArticle(articleId, {
+      id: user.id,
+      role: user.role,
+    });
+
+    return {
+      success: true,
+      message: "Article published successfully.",
+    };
+  } catch (error) {
+    const normalizedError = normalizeError(error, ErrorResource.ARTICLE);
+
+    return {
+      success: false,
+      message: normalizedError.message,
+    };
+  }
+}
+export async function updateArticleStatusAction(
+  articleId: string,
+  status: "DRAFT" | "PUBLISHED",
+) {
+  try {
+    const user = await requireAuth();
+    const parsed = updateArticleStatusSchema.safeParse({
+      articleId,
+      status,
+    });
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        message: "Invalid article status.",
+      };
+    }
+
+    const article = await articleService.updateArticleStatus(
+      {
+        articleId: parsed.data.articleId,
+        status: parsed.data.status,
+      },
+      {
+        id: user.id,
+        role: user.role,
+      },
+    );
+
+    return {
+      success: true,
+      message:
+        status === "PUBLISHED"
+          ? "Article published successfully."
+          : "Article moved back to draft.",
+      article,
+    };
+  } catch (error) {
+    const normalizedError = normalizeError(error, ErrorResource.ARTICLE);
+    return {
+      success: false,
+      message: normalizedError.message,
+    };
+  }
+}
+export async function unpublishArticleAction(articleId: string) {
+  try {
+    const user = await requireAuth();
+
+    if (user.role !== "ADMIN") {
+      return {
+        success: false,
+        message: "Only administrators can unpublish articles.",
+      };
+    }
+
+    await articleService.unpublishArticle(articleId, {
+      id: user.id,
+      role: user.role,
+    });
+
+    return {
+      success: true,
+      message: "Article moved back to draft.",
+    };
+  } catch (error) {
+    const normalizedError = normalizeError(error, ErrorResource.ARTICLE);
+
+    return {
+      success: false,
+      message: normalizedError.message,
     };
   }
 }

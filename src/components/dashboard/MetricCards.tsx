@@ -9,10 +9,11 @@ import {
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
-import { DashboardStats } from "@/lib/dashboard/get-dashboard-data";
+import { AuthorDashboardStats } from "@/lib/types/dashboard.types";
+// import { DashboardStats } from "@/lib/dashboard/get-dashboard-data";
 
 interface MetricCardsProps {
-  stats: DashboardStats;
+  stats: AuthorDashboardStats;
 }
 
 export default function MetricCards({ stats }: MetricCardsProps) {
@@ -105,24 +106,30 @@ export default function MetricCards({ stats }: MetricCardsProps) {
         </div>
       </Link>
 
-      {/* Card 4: Reader Impressions / Views */}
-      <div className="bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs">
-        <div className="flex items-center justify-between text-muted-foreground mb-1">
-          <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-bold text-muted-foreground">
-            Impressions
-          </span>
-          <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-indigo-500" />
-        </div>
-        <div className="mt-1 sm:mt-2 mb-0.5 flex items-baseline justify-between">
-          <span className="text-2xl sm:text-3xl font-serif font-bold text-foreground">
-            {formatViews(stats.totalViews)}
-          </span>
-          <span className="text-[10px] sm:text-xs text-[#047857] font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-1 py-0.2 rounded">
-            +24%
-          </span>
-        </div>
-        <div className="text-[10px] sm:text-xs text-muted-foreground font-sans">
-          total reader impressions
+        {/* Card 4: Reader Impressions / Views */}
+        <div className="min-w-[200px] flex-1 bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs snap-start relative overflow-hidden flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-600 sm:hidden" />
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+              Reader Impressions
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900">
+              <Eye className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-1">
+            <div className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
+              {/* {formatViews(stats.)} */}
+            </div>
+            <div className="flex items-center gap-1 mt-1 text-[11px]">
+              <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-semibold gap-0.5">
+                <TrendingUp className="h-3.5 w-3.5" /> +24.1%
+              </span>
+              <span className="text-muted-foreground">
+                unique readers today
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

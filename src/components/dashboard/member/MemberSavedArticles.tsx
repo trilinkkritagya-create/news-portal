@@ -12,25 +12,30 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { MockArticle } from "@/lib/mock-data";
+import { MemberDashboardArticle } from "@/lib/types/dashboard.types";
 
 const INITIAL_PAGE_SIZE = 3;
 
 interface MemberSavedArticlesProps {
-  savedArticles: MockArticle[];
+  savedArticles: MemberDashboardArticle[];
 }
 
 export default function MemberSavedArticles({
   savedArticles: initialArticles,
 }: MemberSavedArticlesProps) {
-  const [articles, setArticles] = useState<MockArticle[]>(initialArticles);
+  const [articles, setArticles] =
+    useState<MemberDashboardArticle[]>(initialArticles);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
 
-  // Extract unique categories from articles
   const categories = useMemo(() => {
-    const set = new Set(articles.map((a) => a.category.name));
+    const set = new Set(
+      articles
+        .map((article) => article.category?.name)
+        .filter((name): name is string => Boolean(name)),
+    );
+
     return ["ALL", ...Array.from(set)];
   }, [articles]);
 
@@ -38,12 +43,16 @@ export default function MemberSavedArticles({
     return articles.filter((article) => {
       const matchesSearch =
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.author.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.category.name.toLowerCase().includes(searchQuery.toLowerCase());
+        (article.author.name ?? "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (article.category?.name ?? "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
       const matchesCategory =
         selectedCategory === "ALL" ||
-        article.category.name === selectedCategory;
+        article.category?.name === selectedCategory;
 
       return matchesSearch && matchesCategory;
     });
@@ -97,10 +106,11 @@ export default function MemberSavedArticles({
                 key={category}
                 type="button"
                 onClick={() => handleCategoryChange(category)}
-                className={`px-2.5 py-1 text-[11px] whitespace-nowrap transition-colors rounded-sm cursor-pointer ${selectedCategory === category
+                className={`px-2.5 py-1 text-[11px] whitespace-nowrap transition-colors rounded-sm cursor-pointer ${
+                  selectedCategory === category
                     ? "bg-foreground text-background font-semibold"
                     : "text-muted-foreground hover:text-foreground"
-                  }`}
+                }`}
               >
                 {category}
               </button>
@@ -130,7 +140,7 @@ export default function MemberSavedArticles({
         ) : (
           displayedArticles.map((article) => {
             const formattedDate = new Date(
-              article.publishedAt || article.createdAt
+              article.publishedAt || article.createdAt,
             ).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -145,21 +155,25 @@ export default function MemberSavedArticles({
                 <div className="min-w-0 flex-1">
                   {/* Category & Read Time */}
                   <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span
-                      className="border px-1.5 py-0.5 font-mono text-[9px] uppercase font-bold tracking-wider rounded-xs"
-                      style={{
-                        borderColor: `${article.category.color}40`,
-                        backgroundColor: `${article.category.color}15`,
-                        color: article.category.color,
-                      }}
-                    >
-                      {article.category.name}
-                    </span>
+                    {article.category && (
+                      <span
+                        className="border px-1.5 py-0.5 font-mono text-[9px] uppercase font-bold tracking-wider rounded-xs"
+                        style={{
+                          borderColor: `${article.category.color}40`,
+                          backgroundColor: `${article.category.color}15`,
+                          color: article.category.color,
+                        }}
+                      >
+                        {article.category.name}
+                      </span>
+                    )}
                     <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-mono">
                       <Clock className="h-3 w-3" />
                       {article.readTime}
                     </span>
-                    <span className="text-muted-foreground/50 text-[10px]">·</span>
+                    <span className="text-muted-foreground/50 text-[10px]">
+                      ·
+                    </span>
                     <span className="text-[11px] text-muted-foreground font-mono">
                       {formattedDate}
                     </span>
@@ -179,14 +193,18 @@ export default function MemberSavedArticles({
 
                   {/* Author */}
                   <div className="mt-2.5 flex items-center gap-2 text-xs text-muted-foreground">
-                    <Image
-                      src={article.author.image}
-                      alt={article.author.name}
-                      width={18}
-                      height={18}
-                      unoptimized
-                      className="h-4.5 w-4.5 rounded-full object-cover border border-border"
-                    />
+                    {article.author.image ? (
+                      <Image
+                        src={article.author.image}
+                        alt={article.author.name ?? "Author"}
+                        width={18}
+                        height={18}
+                        unoptimized
+                        className="h-4.5 w-4.5 rounded-full object-cover border border-border"
+                      />
+                    ) : (
+                      <div className="h-4.5 w-4.5 rounded-full border border-border bg-secondary" />
+                    )}
                     <span className="font-medium text-foreground">
                       {article.author.name}
                     </span>

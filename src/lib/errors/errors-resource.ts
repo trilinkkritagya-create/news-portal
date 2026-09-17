@@ -11,4 +11,5 @@ export enum ErrorResource {
   ADMIN = "ADMIN",
   EXTERNAL_API = "EXTERNAL_API",
   SYSTEM = "SYSTEM",
+  STATS = "STATS",
 }

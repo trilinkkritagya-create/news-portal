@@ -9,14 +9,10 @@ import {
   MessageSquare,
   Flame,
 } from "lucide-react";
+import { MemberDashboardStats } from "@/lib/types/dashboard.types";
 
 interface MemberMetricCardsProps {
-  stats: {
-    bookmarkedCount: number;
-    likedCount: number;
-    commentsPosted: number;
-    readingStreakDays: number;
-  };
+  stats: MemberDashboardStats;
 }
 
 export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
@@ -110,7 +106,7 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
               </span>
             </div>
             <div className="text-3xl font-bold tracking-tight text-foreground">
-              {stats.bookmarkedCount}
+              {stats.bookmarkedArticles}
             </div>
             <div className="mt-2 text-xs text-muted-foreground">
               <span>Saved for in-depth reading &amp; research</span>
@@ -132,7 +128,7 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
               </span>
             </div>
             <div className="text-3xl font-bold tracking-tight text-foreground">
-              {stats.likedCount}
+              {stats.likedArticles}
             </div>
             <div className="mt-2 text-xs text-muted-foreground">
               <span>Articles supported and liked</span>
@@ -165,7 +161,9 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
           </div>
           <div className="mt-4 flex justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
             <span>Status:</span>
-            <span className="font-semibold text-foreground">Verified Member</span>
+            <span className="font-semibold text-foreground">
+              Verified Member
+            </span>
           </div>
         </a>
 
@@ -201,10 +199,11 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
             key={i}
             type="button"
             onClick={() => scrollToCard(i)}
-            className={`h-1.5 rounded-full transition-all cursor-pointer ${activeIndex === i
+            className={`h-1.5 rounded-full transition-all cursor-pointer ${
+              activeIndex === i
                 ? "w-5 bg-foreground"
                 : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/60"
-              }`}
+            }`}
             aria-label={`Go to slide ${i + 1}`}
           />
         ))}

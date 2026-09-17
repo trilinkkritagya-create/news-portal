@@ -127,7 +127,6 @@ model ArticleLike {
 
  article  Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
- 
 
   createdAt DateTime @default(now())
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useTransition } from "react";
 import Link from "next/link";
 import {
   ChevronDown,
@@ -16,15 +15,24 @@ import {
   Loader2,
   AlertTriangle,
 } from "lucide-react";
-import { DashboardArticleItem } from "@/lib/dashboard/get-dashboard-data";
+// import { DashboardArticleItem } from "@/lib/dashboard/get-dashboard-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DashboardArticleItem } from "@/lib/types/dashboard.types";
+import { CATEGORY_COLORS } from "@/lib/constants/extra";
+import { updateArticleStatusAction } from "@/lib/actions/article/article.action";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Send } from "lucide-react";
+import { ArticleStatus } from "@/generated/prisma/enums";
+import Tooltip from "../ui/tooltip";
+
+// import { DashboardArticleItem } from "@/lib/dashboard/get-dashboard-data";
 
 const INITIAL_PAGE_SIZE = 8;
 
 interface ArticlesTableProps {
   articles: DashboardArticleItem[];
 }
-
 export default function ArticlesTable({ articles }: ArticlesTableProps) {
   const router = useRouter();
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
@@ -32,54 +40,22 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
-
-  // Deletion state
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<DashboardArticleItem | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const handleDeleteArticle = async () => {
-    if (!deleteTarget) return;
-    setDeletingId(deleteTarget.id);
-    setDeleteError(null);
-
-    try {
-      const res = await fetch(`/api/articles/${deleteTarget.id}`, {
-        method: "DELETE",
-      });
-      const json = await res.json();
-
-      if (!res.ok || !json.success) {
-        throw new Error(json.error?.message || "Failed to delete article.");
-      }
-
-      // Optimistically remove from state
-      setDeletedIds((prev) => [...prev, deleteTarget.id]);
-      setDeleteTarget(null);
-      router.refresh();
-    } catch (err: unknown) {
-      setDeleteError(
-        err instanceof Error ? err.message : "Failed to delete article."
-      );
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
-  const resetFilters = () => {
-    setSearchQuery("");
-    setStatusFilter("ALL");
-    setCategoryFilter("ALL");
-  };
+  const [changingStatusArticleId, setChangingStatusArticleId] = useState<
+    string | null
+  >(null);
+  const [isPublishing, startPublishing] = useTransition();
+  const router = useRouter();
 
   const categoryOptions = useMemo(() => {
     const map = new Map<string, string>();
-    articles.forEach((a) => {
-      if (a.categoryName) {
-        map.set(a.categoryName, a.categoryName);
+
+    articles.forEach((article) => {
+      if (article.category) {
+        map.set(article.category.slug, article.category.name);
       }
     });
-    return Array.from(map.values());
+
+    return Array.from(map.entries());
   }, [articles]);
 
   const filteredArticles = useMemo(() => {
@@ -88,16 +64,18 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
       if (deletedIds.includes(article.id)) return false;
 
       const matchesSearch =
-        !q ||
-        article.title.toLowerCase().includes(q) ||
-        article.authorName.toLowerCase().includes(q) ||
-        article.categoryName.toLowerCase().includes(q);
-
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (article.author?.name ?? "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (article.category?.name ?? "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
       const matchesStatus =
         statusFilter === "ALL" || article.status === statusFilter;
 
       const matchesCategory =
-        categoryFilter === "ALL" || article.categoryName === categoryFilter;
+        categoryFilter === "ALL" || article.category?.slug === categoryFilter;
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
@@ -107,32 +85,35 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
     return filteredArticles.slice(0, visibleCount);
   }, [filteredArticles, visibleCount]);
 
-  const handleExportCSV = () => {
-    if (filteredArticles.length === 0) return;
-    const headers = ["Title", "Category", "Status", "Author", "Date", "Slug"];
-    const rows = filteredArticles.map((a) => [
-      `"${(a.title || "").replace(/"/g, '""')}"`,
-      `"${a.categoryName || ""}"`,
-      `"${a.status || ""}"`,
-      `"${(a.authorName || "").replace(/"/g, '""')}"`,
-      `"${a.publishedAt || a.createdAt}"`,
-      `"${a.slug || ""}"`,
-    ]);
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `chronicle-dispatches-${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleStatusChange = (
+    articleId: string,
+    status: "DRAFT" | "PUBLISHED",
+  ) => {
+    setChangingStatusArticleId(articleId);
+
+    startPublishing(async () => {
+      try {
+        const result = await updateArticleStatusAction(articleId, status);
+        if (!result.success) {
+          toast.error(result.message);
+          return;
+        }
+        if (status === ArticleStatus.PUBLISHED) {
+          toast.success("Article published successfully.");
+        } else {
+          toast.success("Article unpublished successfully.");
+        }
+
+        router.refresh();
+      } finally {
+        setChangingStatusArticleId(null);
+      }
+    });
   };
 
+  const getCategoryColor = (slug?: string | null) => {
+    return CATEGORY_COLORS[slug ?? ""] ?? "#64748b";
+  };
   const renderStatusBadge = (status: string) => {
     if (status === "PUBLISHED") {
       return (
@@ -159,7 +140,7 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
   };
 
   return (
-    <div className="bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between flex-1">
+    <div className="bg-card border border-border overflow-visible rounded-xl shadow-2xs  h-full flex flex-col justify-between flex-1">
       {/* Table Header Toolbar */}
       <div className="p-3.5 sm:p-4 border-b border-[#E2E8F0] dark:border-slate-800 flex flex-col gap-3 bg-slate-50/50 dark:bg-slate-900/30 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
@@ -176,43 +157,28 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
               Dispatches published and staged across all regional desks
             </p>
           </div>
-
-          {/* On Desktop/Tablet: quick reset if active */}
-          {(categoryFilter !== "ALL" || statusFilter !== "ALL" || searchQuery) && (
-            <button
-              type="button"
-              onClick={resetFilters}
-              className="hidden sm:inline-flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground cursor-pointer"
-            >
-              <RotateCcw className="h-3 w-3" />
-              Reset filters
-            </button>
-          )}
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Dispatches published and staged across all regional desks
+          </p>
         </div>
-
-        {/* Toolbar Controls: Clean stacked mobile layout, seamless inline desktop layout */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          {/* Search box + Export Button in Mobile Row 1 */}
-          <div className="flex items-center gap-2 flex-1">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 dark:text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search dispatches or authors..."
-                className="w-full pl-8 pr-7 py-2 sm:py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 rounded-lg text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary transition-colors font-sans shadow-2xs"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded cursor-pointer"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
+        {/* Toolbar Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Desks / Categories Filter */}
+          <div className="relative">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="appearance-none bg-slate-50 dark:bg-slate-900 border border-border text-xs font-medium text-foreground py-1.5 pl-2.5 pr-7 rounded focus:outline-none focus:border-primary cursor-pointer font-sans"
+            >
+              <option value="ALL">All Desks</option>
+              {categoryOptions.map(([slug, name]) => (
+                <option key={slug} value={slug}>
+                  {name} Desk
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          </div>
 
             {/* Export button */}
             <button
@@ -281,7 +247,7 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
       {/* ========================================================================= */}
       {/* 1. DESKTOP & TABLET VIEW: Crisp Editorial Data Table (sm:block)          */}
       {/* ========================================================================= */}
-      <div className="hidden sm:block overflow-x-auto no-scrollbar flex-1">
+      <div className="hidden sm:block overflow-x-auto overflow-y-visible no-scrollbar flex-1">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-border bg-slate-50/75 dark:bg-slate-900/50 text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
@@ -317,6 +283,9 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
               </tr>
             ) : (
               displayedArticles.map((article) => {
+                const isThisArticlePublishing =
+                  changingStatusArticleId === article.id;
+
                 const formattedDate = article.publishedAt
                   ? new Date(article.publishedAt).toLocaleDateString("en-US", {
                       month: "short",
@@ -332,13 +301,13 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                     });
 
                 const authorInitial = (
-                  article.authorName?.[0] || "A"
+                  article.author?.name?.[0] || "A"
                 ).toUpperCase();
 
                 return (
                   <tr
                     key={article.id}
-                    className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors group"
+                    className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors "
                   >
                     {/* Status */}
                     <td className="py-3 pl-4 pr-2 whitespace-nowrap">
@@ -353,29 +322,26 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                       >
                         {article.title}
                       </Link>
-                      {article.excerpt ? (
-                        <div className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
-                          {article.excerpt}
-                        </div>
-                      ) : (
-                        <div className="text-[10px] font-mono text-muted-foreground/60 mt-0.5">
-                          ID #{article.id.slice(-6).toUpperCase()}
-                        </div>
-                      )}
                     </td>
 
                     {/* Category */}
                     <td className="py-3 px-3 whitespace-nowrap">
-                      <span
-                        className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border"
-                        style={{
-                          borderColor: `${article.categoryColor || "#1e3a8a"}40`,
-                          backgroundColor: `${article.categoryColor || "#1e3a8a"}15`,
-                          color: article.categoryColor || "#1e3a8a",
-                        }}
-                      >
-                        {article.categoryName}
-                      </span>
+                      {article.category ? (
+                        <span
+                          className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border"
+                          style={{
+                            borderColor: `${getCategoryColor(article.category.slug)}40`,
+                            backgroundColor: `${getCategoryColor(article.category.slug)}15`,
+                            color: getCategoryColor(article.category.slug),
+                          }}
+                        >
+                          {article.category.name}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground">
+                          Uncategorized
+                        </span>
+                      )}
                     </td>
 
                     {/* Author */}
@@ -387,7 +353,7 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                           </AvatarFallback>
                         </Avatar>
                         <span className="font-medium text-foreground text-xs">
-                          {article.authorName}
+                          {article.author?.name}
                         </span>
                       </div>
                     </td>
@@ -397,35 +363,68 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                       {formattedDate}
                     </td>
 
-                    {/* Actions */}
                     <td className="py-3 pl-2 pr-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
-                        <Link
-                          href={`/dashboard/articles/edit/${article.id}`}
-                          className="p-1 text-muted-foreground hover:text-primary transition-colors rounded hover:bg-muted"
-                          title="Edit Article"
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Link>
-                        <Link
-                          href={`/articles/${article.slug}`}
-                          target="_blank"
-                          className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted"
-                          title="Preview Live"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDeleteTarget(article);
-                            setDeleteError(null);
-                          }}
-                          className="p-1 text-muted-foreground hover:text-red-600 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
-                          title="Delete Article"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                        <Tooltip content="Edit Article" position="top">
+                          <Link
+                            href={`/dashboard/articles/edit/${article.id}`}
+                            className="p-1 text-muted-foreground hover:text-primary transition-colors rounded hover:bg-muted"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Link>
+                        </Tooltip>
+
+                        {/* Publish - ADMIN only */}
+                        {article.status === ArticleStatus.DRAFT ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleStatusChange(
+                                article.id,
+                                ArticleStatus.PUBLISHED,
+                              )
+                            }
+                            disabled={isPublishing}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/70 transition-colors text-[10px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Publish Article"
+                          >
+                            <Send className="h-3 w-3" />
+
+                            {isThisArticlePublishing
+                              ? "Publishing..."
+                              : "Publish"}
+                          </button>
+                        ) : article.status === ArticleStatus.PUBLISHED ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleStatusChange(
+                                article.id,
+                                ArticleStatus.DRAFT,
+                              )
+                            }
+                            disabled={isPublishing}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/70 transition-colors text-[10px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Unpublish Article"
+                          >
+                            <Send className="h-3 w-3 rotate-180" />
+
+                            {isThisArticlePublishing
+                              ? "Unpublishing..."
+                              : "Unpublish"}
+                          </button>
+                        ) : null}
+
+                        {/* Preview */}
+                        <Tooltip content="Preview Live" position="top">
+                          <Link
+                            href={`/articles/${article.slug}`}
+                            target="_blank"
+                            className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Link>
+                        </Tooltip>
                       </div>
                     </td>
                   </tr>
@@ -461,21 +460,27 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
             ).toUpperCase();
 
             return (
-              <article key={article.id} className="py-3.5 first:pt-2.5 last:pb-2.5 space-y-2">
-                {/* Meta Row: Category + Status + Time */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span
-                      className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border tracking-wider"
-                      style={{
-                        borderColor: `${article.categoryColor || "#1e3a8a"}40`,
-                        backgroundColor: `${article.categoryColor || "#1e3a8a"}15`,
-                        color: article.categoryColor || "#1e3a8a",
-                      }}
-                    >
-                      {article.categoryName}
-                    </span>
+              <article key={article.id} className="py-3 first:pt-1 last:pb-1">
+                {/* Meta Row: Status + Category + Time */}
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2">
                     {renderStatusBadge(article.status)}
+                    {article.category ? (
+                      <span
+                        className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border"
+                        style={{
+                          borderColor: `${getCategoryColor(article.category.slug)}40`,
+                          backgroundColor: `${getCategoryColor(article.category.slug)}15`,
+                          color: getCategoryColor(article.category.slug),
+                        }}
+                      >
+                        {article.category.name}
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-muted-foreground">
+                        Uncategorized
+                      </span>
+                    )}
                   </div>
                   <span className="text-[10px] font-mono text-muted-foreground shrink-0">
                     {formattedDate}
@@ -490,26 +495,12 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
                   {article.title}
                 </Link>
 
-                {article.excerpt && (
-                  <p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">
-                    {article.excerpt}
-                  </p>
-                )}
-
-                {/* Author + Quick Actions */}
-                <div className="flex items-center justify-between pt-1 border-t border-border/40 text-xs">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <Avatar className="w-5 h-5 border border-border shrink-0">
-                      <AvatarFallback className="bg-slate-200 dark:bg-slate-800 text-[10px] font-bold">
-                        {authorInitial}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium text-foreground text-[11px] truncate max-w-[130px]">
-                      {article.authorName}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 shrink-0">
+                {/* Author + Quick Action */}
+                <div className="flex items-center justify-between mt-2 pt-1 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground text-[11px]">
+                    {article.author?.name}
+                  </span>
+                  <div className="flex items-center gap-3">
                     <Link
                       href={`/dashboard/articles/edit/${article.id}`}
                       className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-foreground text-[11px] font-semibold transition-colors shadow-2xs"
@@ -569,16 +560,17 @@ export default function ArticlesTable({ articles }: ArticlesTableProps) {
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
           )}
-          {visibleCount >= filteredArticles.length && filteredArticles.length > INITIAL_PAGE_SIZE && (
-            <button
-              type="button"
-              onClick={() => setVisibleCount(INITIAL_PAGE_SIZE)}
-              className="inline-flex items-center gap-1 px-3 py-1 border border-border rounded bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs transition-colors cursor-pointer"
-            >
-              <span>Show Less</span>
-              <ChevronUp className="h-3 w-3" />
-            </button>
-          )}
+          {visibleCount >= filteredArticles.length &&
+            filteredArticles.length > INITIAL_PAGE_SIZE && (
+              <button
+                type="button"
+                onClick={() => setVisibleCount(INITIAL_PAGE_SIZE)}
+                className="inline-flex items-center gap-1 px-3 py-1 border border-border rounded bg-card hover:bg-muted text-muted-foreground hover:text-foreground text-xs transition-colors cursor-pointer"
+              >
+                <span>Show Less</span>
+                <ChevronUp className="h-3 w-3" />
+              </button>
+            )}
         </div>
       </div>
 
