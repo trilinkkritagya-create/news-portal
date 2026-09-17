@@ -8,12 +8,15 @@ interface SidebarContextType {
   open: () => void;
   close: () => void;
   toggle: () => void;
+  customSidebarContent: React.ReactNode | null;
+  setCustomSidebarContent: React.Dispatch<React.SetStateAction<React.ReactNode | null>>;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [customSidebarContent, setCustomSidebarContent] = useState<React.ReactNode | null>(null);
   const pathname = usePathname();
 
   // Automatically close sidebar when navigating to a new route on mobile/tablet
@@ -51,7 +54,16 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const toggle = () => setIsOpen((prev) => !prev);
 
   return (
-    <SidebarContext.Provider value={{ isOpen, open, close, toggle }}>
+    <SidebarContext.Provider
+      value={{
+        isOpen,
+        open,
+        close,
+        toggle,
+        customSidebarContent,
+        setCustomSidebarContent,
+      }}
+    >
       {children}
     </SidebarContext.Provider>
   );

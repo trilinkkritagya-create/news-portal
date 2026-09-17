@@ -9,7 +9,6 @@ import {
   Clock,
   Terminal,
   Check,
-  TrendingUp,
 } from "lucide-react";
 import { MockArticle } from "@/lib/mock-data";
 
@@ -145,7 +144,7 @@ export default function HeroLeadSection({
               className="object-cover group-hover:scale-[1.015] transition-transform duration-500 ease-out"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
-            <figcaption className="absolute bottom-2.5 left-3.5 right-3.5 text-[11px] text-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 drop-shadow-md">
+            <figcaption className="absolute bottom-2.5 left-3.5 right-3.5 text-[11px] text-slate-200 flex flex-col md:flex-row md:justify-between md:items-center gap-1 drop-shadow-md min-w-0">
               <span className="truncate max-w-md">
                 Cryogenic benchmark calibration during high-throughput
                 deployment test.

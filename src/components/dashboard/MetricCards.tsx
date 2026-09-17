@@ -19,7 +19,7 @@ interface MetricCardsProps {
 export default function MetricCards({ stats }: MetricCardsProps) {
   const formatViews = (views: number) => {
     if (views >= 1000000) {
-      return `${(views / 1000000).toFixed(2)}M`;
+      return `${(views / 1000000).toFixed(1)}M`;
     }
     if (views >= 1000) {
       return `${(views / 1000).toFixed(1)}K`;
@@ -33,103 +33,78 @@ export default function MetricCards({ stats }: MetricCardsProps) {
       : 100;
 
   return (
-    <section className="w-full">
-      {/* Mobile Swipe Hint */}
-      <div className="flex items-center justify-between mb-2 lg:hidden">
-        <span className="font-mono text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-          Operational Metrics
-        </span>
-        <span className="text-[11px] text-primary font-medium">
-          Swipe cards →
-        </span>
-      </div>
+    <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+      {/* Card 1: Total Articles */}
+      <Link
+        href="/dashboard/articles"
+        className="bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:border-[#881337] transition-all group"
+      >
+        <div className="flex items-center justify-between text-muted-foreground mb-1">
+          <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-bold text-muted-foreground">
+            Total Articles
+          </span>
+          <Newspaper className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground/80" />
+        </div>
+        <div className="mt-1 sm:mt-2 mb-0.5 flex items-baseline gap-1.5 sm:gap-2">
+          <span className="text-2xl sm:text-3xl font-serif font-bold text-foreground">
+            {stats.totalArticles.toLocaleString()}
+          </span>
+          <span className="text-[10px] sm:text-xs text-[#047857] font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-1 py-0.2 rounded">
+            +12%
+          </span>
+        </div>
+        <div className="text-[10px] sm:text-xs text-muted-foreground font-sans">
+          dispatches filed to date
+        </div>
+      </Link>
 
-      {/* Responsive Container:
-          - Mobile (default): horizontal snap-scrollable strip with no-scrollbar
-          - Tablet (sm/md): 2x2 grid (grid-cols-2)
-          - Desktop (lg): 4 columns in 1 row (grid-cols-4)
-      */}
-      <div className="flex overflow-x-auto no-scrollbar gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 pb-2 sm:pb-0 snap-x snap-mandatory">
-        {/* Card 1: Total Articles */}
-        <Link
-          href="/dashboard/articles"
-          className="min-w-[200px] flex-1 bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs snap-start relative overflow-hidden flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors group"
-        >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-primary sm:hidden" />
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-              Total Articles
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-primary dark:bg-blue-950/40 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900">
-              <Newspaper className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-1">
-            <div className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
-              {stats.totalArticles.toLocaleString()}
-            </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px]">
-              <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-semibold gap-0.5">
-                <TrendingUp className="h-3.5 w-3.5" /> +12%
-              </span>
-              <span className="text-muted-foreground">from last week</span>
-            </div>
-          </div>
-        </Link>
+      {/* Card 2: Published */}
+      <Link
+        href="/dashboard/articles"
+        className="bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:border-emerald-500 transition-all group"
+      >
+        <div className="flex items-center justify-between text-muted-foreground mb-1">
+          <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-bold text-muted-foreground">
+            Published Live
+          </span>
+          <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
+        </div>
+        <div className="mt-1 sm:mt-2 mb-0.5 flex items-baseline justify-between">
+          <span className="text-2xl sm:text-3xl font-serif font-bold text-foreground">
+            {stats.publishedArticles.toLocaleString()}
+          </span>
+          <span className="bg-[#ECFDF5] border border-[#A7F3D0] text-[#047857] dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[11px] font-semibold tracking-wide">
+            {publishedRate}% Rate
+          </span>
+        </div>
+        <div className="text-[10px] sm:text-xs text-muted-foreground font-sans">
+          public reader accessible
+        </div>
+      </Link>
 
-        {/* Card 2: Published */}
-        <Link
-          href="/dashboard/articles"
-          className="min-w-[200px] flex-1 bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs snap-start relative overflow-hidden flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors group"
-        >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-600 sm:hidden" />
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-              Published
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900">
-              <CheckCircle2 className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-1">
-            <div className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
-              {stats.publishedArticles.toLocaleString()}
-            </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px]">
-              <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-semibold gap-0.5">
-                <TrendingUp className="h-3.5 w-3.5" /> +{publishedRate}%
-              </span>
-              <span className="text-muted-foreground">vs target pace</span>
-            </div>
-          </div>
-        </Link>
-
-        {/* Card 3: In Review & Draft */}
-        <Link
-          href="/dashboard/articles"
-          className="min-w-[200px] flex-1 bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs snap-start relative overflow-hidden flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors group"
-        >
-          <div className="absolute top-0 left-0 right-0 h-1 bg-amber-600 sm:hidden" />
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-              In Review &amp; Draft
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 flex items-center justify-center border border-amber-100 dark:border-amber-900">
-              <Clock className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-1">
-            <div className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
-              {stats.draftArticles.toLocaleString()}
-            </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px]">
-              <span className="inline-flex items-center text-amber-700 dark:text-amber-400 font-medium gap-0.5">
-                <AlertCircle className="h-3.5 w-3.5" /> 18 urgent
-              </span>
-              <span className="text-muted-foreground">queued proofing</span>
-            </div>
-          </div>
-        </Link>
+      {/* Card 3: In Review & Draft */}
+      <Link
+        href="/dashboard/articles"
+        className="bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:border-amber-500 transition-all group"
+      >
+        <div className="flex items-center justify-between text-muted-foreground mb-1">
+          <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-bold text-muted-foreground">
+            Review &amp; Draft
+          </span>
+          <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500" />
+        </div>
+        <div className="mt-1 sm:mt-2 mb-0.5 flex items-baseline justify-between">
+          <span className="text-2xl sm:text-3xl font-serif font-bold text-foreground">
+            {stats.draftArticles.toLocaleString()}
+          </span>
+          <span className="bg-amber-50 border border-amber-200 text-amber-700 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300 px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[11px] font-semibold">
+            In Queue
+          </span>
+        </div>
+        <div className="text-[10px] sm:text-xs text-muted-foreground font-sans">
+          active drafting workbench
+        </div>
+      </Link>
 
         {/* Card 4: Reader Impressions / Views */}
         <div className="min-w-[200px] flex-1 bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs snap-start relative overflow-hidden flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors">

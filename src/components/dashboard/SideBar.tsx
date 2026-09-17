@@ -15,7 +15,7 @@ import {
   X,
   LogOut,
   Newspaper,
-  Radio,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import { UserRole } from "@/generated/prisma/enums";
@@ -56,6 +56,7 @@ function SidebarContent({
   onClose,
 }: SidebarContentProps) {
   const pathname = usePathname();
+  const { customSidebarContent } = useSidebar();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -67,7 +68,7 @@ function SidebarContent({
   const navItems: NavItem[] = [
     {
       href: "/dashboard",
-      label: "Overview",
+      label: "Overviews",
       icon: LayoutDashboard,
     },
   ];
@@ -75,7 +76,7 @@ function SidebarContent({
   if (role !== UserRole.MEMBER) {
     navItems.push({
       href: "/dashboard/articles",
-      label: "Articles",
+      label: "Article",
       icon: FileText,
     });
   }
@@ -86,8 +87,8 @@ function SidebarContent({
         href: "/dashboard/comments",
         label: "Comments",
         icon: MessageSquare,
-        badge: "14",
-        badgeType: "default",
+        badge: "2",
+        badgeType: "alert",
       },
       {
         href: "/dashboard/users",
@@ -100,7 +101,7 @@ function SidebarContent({
   if (role === UserRole.AUTHOR) {
     navItems.push({
       href: "/dashboard/my-articles",
-      label: "My Articles",
+      label: "My Dispatches",
       icon: BookOpen,
     });
   }
@@ -128,36 +129,36 @@ function SidebarContent({
 
   const roleTitle =
     role === UserRole.ADMIN
-      ? "Administrator"
+      ? "Chief Discourse Editor"
       : role === UserRole.AUTHOR
-        ? "Author"
-        : "Member";
+        ? "Staff Columnist"
+        : "Verified Reader";
 
   const userInitial = (
     user?.name?.[0] ||
     user?.email?.[0] ||
-    "A"
+    "E"
   ).toUpperCase();
 
   return (
-    <div className="flex h-full flex-col justify-between bg-sidebar text-foreground select-none">
-      <div className="flex flex-col">
-        {/* Brand Header */}
-        <div className="flex items-center justify-between border-b border-border px-5 py-4 shrink-0 bg-card">
+    <div className="flex h-full flex-col justify-between bg-[#213145] text-white select-none overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+        {/* Top Masthead Header */}
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
+            <div className="flex h-9 w-9 items-center justify-center rounded bg-[#881337] text-white shadow-sm shrink-0">
               <Newspaper className="h-5 w-5" />
             </div>
-            <div>
+            <div className="flex flex-col min-w-0">
               <Link
                 href="/dashboard"
                 onClick={onClose}
-                className="font-serif font-bold text-base text-foreground tracking-tight leading-tight block hover:text-primary transition-colors"
+                className="font-serif font-bold text-base text-white tracking-tight leading-tight block hover:text-[#ffd9dd] transition-colors truncate"
               >
                 News Portal
               </Link>
-              <span className="inline-block mt-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 tracking-wider uppercase font-mono">
-                {roleTitle}
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#d3e4fe]/80 font-medium truncate">
+                Editorial Operations
               </span>
             </div>
           </div>
@@ -167,7 +168,7 @@ function SidebarContent({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex size-8 items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none cursor-pointer transition-colors"
+              className="inline-flex size-8 items-center justify-center rounded p-1 text-[#cbdbf5] hover:bg-white/10 hover:text-white focus:outline-none cursor-pointer transition-colors"
               aria-label="Close sidebar"
             >
               <X className="size-5" />
@@ -175,8 +176,8 @@ function SidebarContent({
           )}
         </div>
 
-        {/* Navigation Links */}
-        <nav className="space-y-1 p-3">
+        {/* Navigation Tabs */}
+        <nav className="space-y-1 p-3 shrink-0">
           {navItems.map((item) => (
             <SidebarItem
               key={item.href}
@@ -191,34 +192,37 @@ function SidebarContent({
           ))}
         </nav>
 
-        {/* Desktop Wire Feed Stream Status Widget */}
-        {!isMobile && (
-          <div className="mx-3 mt-2 rounded-lg border border-border bg-card p-3 shadow-2xs">
-            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-foreground">
-                Wire Feed
-              </span>
-              <span className="flex items-center gap-1.5 text-[10px] font-mono font-medium text-emerald-600 dark:text-emerald-400">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                </span>
-                SYNCED
-              </span>
-            </div>
-            <div className="text-[11px] text-muted-foreground truncate font-mono">
-              AP, Reuters, Bloomberg live
-            </div>
+        {/* Custom Contextual Section for Mobile & Tablet (e.g. Filters) */}
+        {isMobile && customSidebarContent && (
+          <div className="px-3 py-2 border-t border-white/10 shrink-0">
+            {customSidebarContent}
           </div>
         )}
+      </div>
 
-        {/* Mobile / Tablet Newsroom Notice */}
-        {isMobile && (
-          <div className="mx-3 mt-2 rounded-lg border border-border bg-card p-3 shadow-2xs">
-            <div className="flex items-center gap-1.5 mb-1 text-red-600 dark:text-red-400">
-              <Radio className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider">
-                Newsroom Wire
+      {/* Bottom User Profile Footer */}
+      <div className="border-t border-white/15 bg-black/15 p-3.5 shrink-0 space-y-2">
+        <div className="flex items-center justify-between gap-2 px-1">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Avatar className="size-8.5 shrink-0 rounded border border-white/20">
+              {user?.image ? (
+                <AvatarImage src={user.image} alt={user?.name || "User"} />
+              ) : (
+                <AvatarImage
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+                  alt="Editorial User"
+                />
+              )}
+              <AvatarFallback className="bg-[#881337] text-white font-semibold text-xs rounded">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-medium text-white truncate">
+                {user?.name || roleTitle}
+              </span>
+              <span className="text-[10px] font-mono text-[#cbdbf5]/70 truncate">
+                {user?.email || "mod-desk@newsportal.press"}
               </span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-snug">
@@ -226,39 +230,27 @@ function SidebarContent({
               dispatches queued.
             </p>
           </div>
-        )}
-      </div>
 
-      {/* Bottom Footer: User Identity & Logout */}
-      <div className="border-t border-border bg-card/60 p-4 shrink-0 space-y-2">
-        <div className="flex items-center gap-3 px-1 py-1 rounded-lg">
-          <Avatar className="size-9 shrink-0 ring-1 ring-border">
-            {user?.image && (
-              <AvatarImage src={user.image} alt={user?.name || "User"} />
-            )}
-            <AvatarFallback className="bg-[#1e3a8a] text-white font-semibold text-xs">
-              {userInitial}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1 leading-tight">
-            <p className="text-xs font-semibold text-foreground truncate">
-              {user?.name || "Eleanor Vance"}
-            </p>
-            <p className="text-[11px] font-mono text-muted-foreground truncate">
-              {user?.email || "e.vance@newsportal.com"}
-            </p>
+          <div className="flex items-center gap-1 shrink-0">
+            <Link
+              href="/dashboard/profile"
+              onClick={onClose}
+              className="text-[#cbdbf5] hover:text-white p-1 rounded hover:bg-white/10 transition-colors"
+              title="Editorial Settings"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+            </Link>
+            <form action={logoutAction} className="inline">
+              <button
+                type="submit"
+                className="text-[#cbdbf5] hover:text-red-400 p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                title="Sign out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </form>
           </div>
         </div>
-
-        <form action={logoutAction} className="pt-1">
-          <button
-            type="submit"
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 hover:text-red-700 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-red-200 dark:hover:border-red-900/40"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
-          </button>
-        </form>
       </div>
     </div>
   );
@@ -270,15 +262,15 @@ const SideBar = ({ role, user }: SideBarProps) => {
   return (
     <>
       {/* 1. Mobile & Tablet Drawer */}
-      <div className="lg:hidden">
+      <div className="xl:hidden">
         {isOpen && (
           <>
             <div
               onClick={close}
-              className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
               aria-hidden="true"
             />
-            <aside className="fixed inset-y-0 left-0 z-50 flex h-full w-72 max-w-[85vw] flex-col border-r border-border bg-sidebar shadow-2xl select-none animate-in slide-in-from-left duration-200">
+            <aside className="fixed inset-y-0 left-0 z-50 flex h-full w-72 max-w-[85vw] flex-col border-r border-white/10 bg-[#213145] shadow-2xl select-none animate-in slide-in-from-left duration-200">
               <SidebarContent
                 role={role}
                 user={user}
@@ -290,8 +282,8 @@ const SideBar = ({ role, user }: SideBarProps) => {
         )}
       </div>
 
-      {/* 2. Desktop Permanent Sidebar */}
-      <aside className="hidden lg:flex h-screen w-64 flex-col border-r border-border bg-sidebar select-none shrink-0 sticky top-0">
+      {/* 2. Desktop Permanent Sidebar (>= 1280px) */}
+      <aside className="hidden xl:flex h-screen w-64 flex-col border-r border-white/10 bg-[#213145] select-none shrink-0 sticky top-0">
         <SidebarContent role={role} user={user} />
       </aside>
     </>
@@ -321,18 +313,16 @@ const SidebarItem = ({
     <Link
       href={href}
       onClick={onClick}
-      className={`group flex items-center justify-between rounded-lg px-3.5 py-2.5 text-xs sm:text-sm font-medium transition-all ${
+      className={`group flex items-center justify-between rounded px-3 py-2.5 text-xs sm:text-[13px] transition-colors ${
         active
-          ? "bg-[#0d1527] text-white shadow-xs dark:bg-white dark:text-[#0d1527]"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          ? "bg-[#881337] text-white font-semibold border-l-2 border-[#ffd9dd] shadow-sm"
+          : "text-[#cbdbf5] hover:text-white hover:bg-white/10 font-normal"
       }`}
     >
       <div className="flex items-center gap-3">
         <Icon
-          className={`size-4.5 shrink-0 transition-colors ${
-            active
-              ? "text-white dark:text-[#0d1527]"
-              : "text-muted-foreground group-hover:text-foreground"
+          className={`h-4 w-4 shrink-0 transition-colors ${
+            active ? "text-white fill-white/20" : "text-[#cbdbf5] group-hover:text-white"
           }`}
         />
         <span>{label}</span>
@@ -340,12 +330,12 @@ const SidebarItem = ({
 
       {badge && (
         <span
-          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full font-mono transition-colors ${
+          className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full font-mono transition-colors ${
             active
-              ? "bg-slate-800 text-slate-200 dark:bg-slate-200 dark:text-slate-800"
+              ? "bg-[#640023] text-white"
               : badgeType === "alert"
-                ? "bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-400"
-                : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                ? "bg-rose-500 text-white"
+                : "bg-white/20 text-white"
           }`}
         >
           {badge}
