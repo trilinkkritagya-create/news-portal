@@ -14,7 +14,6 @@ class AuthService {
         email,
       },
     });
-
     if (!user || !user.password) {
       throw Errors.unauthorized(
         "Invalid email or password.",

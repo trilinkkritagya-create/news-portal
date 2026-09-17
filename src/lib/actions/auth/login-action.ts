@@ -37,7 +37,6 @@ export async function loginAction(
       email: formData.get("email"),
       password: formData.get("password"),
     });
-
     if (!result.success) {
       return {
         success: false,
