@@ -53,29 +53,16 @@ const MOCK_CREDENTIALS: Record<
 
 class AuthService {
   async login({ email, password }: LoginServiceInput) {
-    const normalizedEmail = email.trim().toLowerCase();
-
-    // 1. Try Prisma Database query if available
-    try {
-      const user = await prisma.user.findUnique({
-        where: {
-          email: normalizedEmail,
-        },
-      });
-
-      if (user && user.password) {
-        const isPasswordValid = await verifyPassword(password, user.password);
-        if (isPasswordValid) {
-          return {
-            id: user.id,
-            name: user.name ?? "Editorial User",
-            email: user.email,
-            role: user.role as UserRole,
-          };
-        }
-      }
-    } catch (dbError) {
-      console.warn("Prisma DB login failed, checking mock credentials:", dbError);
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    if (!user || !user.password) {
+      throw Errors.unauthorized(
+        "Invalid email or password.",
+        ErrorResource.AUTH,
+      );
     }
 
     // 2. Mock user fallback for 1-click login and local development
