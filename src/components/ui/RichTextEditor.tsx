@@ -40,7 +40,6 @@ export default function RichTextEditor({
   onStatsChange,
   placeholder = "Start drafting your editorial piece here...",
   spellCheckEnabled = true,
-  onToggleSpellCheck,
   onQuickSave,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);

@@ -8,18 +8,18 @@ export default function CategoryBreakdown({
   categories,
 }: CategoryBreakdownProps) {
   return (
-    <div className="bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs">
+    <div className="bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl p-4 sm:p-5 shadow-xs">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-border">
+      <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[#E2E8F0] dark:border-slate-800">
         <h4 className="font-serif font-bold text-sm text-foreground">
           Category Breakdown
         </h4>
-        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-muted-foreground border border-border">
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-muted-foreground border border-slate-200 dark:border-slate-700">
           Past 30D
         </span>
       </div>
 
-      <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">
+      <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed font-sans">
         Story volume distribution across primary editorial desks.
       </p>
 
@@ -28,7 +28,7 @@ export default function CategoryBreakdown({
         {categories.map((cat) => (
           <div key={cat.slug}>
             <div className="flex justify-between items-center text-xs mb-1">
-              <span className="font-medium text-foreground flex items-center gap-1.5 text-[11px]">
+              <span className="font-medium text-foreground flex items-center gap-1.5 text-[11px] font-sans">
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: cat.color || "#1e3a8a" }}
@@ -55,7 +55,7 @@ export default function CategoryBreakdown({
       </div>
 
       {/* Bottom Telemetry */}
-      <div className="mt-4 pt-2.5 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground font-mono">
+      <div className="mt-4 pt-2.5 border-t border-[#E2E8F0] dark:border-slate-800 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
         <span>Avg. Words / Article:</span>
         <span className="font-semibold text-foreground">1,180 words</span>
       </div>

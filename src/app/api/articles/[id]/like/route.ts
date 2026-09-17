@@ -5,14 +5,27 @@ import { normalizeError } from "@/lib/errors/normalizeError";
 import { articleService } from "@/lib/services/article/article.service";
 import { NextRequest, NextResponse } from "next/server";
 
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  return handleLike(request, context);
+}
+
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> },
+) {
+  return handleLike(request, context);
+}
+
+async function handleLike(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = await requireAuth();
-
-    const { id: articleId } = await params;
+    const { id: articleId } = await context.params;
 
     const result = await articleService.toggleLike(articleId, user);
 
@@ -21,7 +34,7 @@ export async function PATCH(
       data: result,
     });
   } catch (error) {
-    const appError = normalizeError(error, ErrorResource.ARTICLE);
+    const appError = normalizeError(error, ErrorResource.ARTICLE); 
 
     return NextResponse.json(
       {
@@ -29,8 +42,9 @@ export async function PATCH(
         error: handleError(appError),
       },
       {
-        status: appError.statusCode,
+        status: appError.statusCode ?? 500,
       },
     );
   }
 }
+

@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 import { Errors } from "@/lib/errors/errors";
 import { ErrorResource } from "@/lib/errors/errors-resource";
 import { generateSlug } from "@/lib/utils/slug";
-import { normalizeError } from "@/lib/errors/normalizeError";
 import sanitizeHtml from "sanitize-html";
 
 interface CreateArticleInput {
@@ -190,6 +189,91 @@ class ArticleService {
       console.log(error, "Error getting articles");
       throw error;
     }
+  }
+  async getArticleById(id: string) {
+    const article = await prisma.article.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            role: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        comments: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!article) {
+      throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
+    }
+
+    return article;
+  }
+
+  async getArticleBySlug(slug: string) {
+    const article = await prisma.article.findUnique({
+      where: { slug },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            role: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        comments: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!article) {
+      throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
+    }
+
+    return article;
   }
   async updateArticlesFeatures(
     articleId: string,
