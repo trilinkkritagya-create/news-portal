@@ -6,7 +6,6 @@ import {
   Menu,
   X,
   Sun,
-  Globe,
   LayoutDashboard,
   LogIn,
   ArrowRight,
@@ -68,14 +67,13 @@ export default function PublicHeader({ user }: PublicHeaderProps) {
             Right: Financial Markets (Positioned beautifully above the search bar space)
             ======================================================== */}
         <div className="w-full pt-2.5 pb-1 text-xs text-muted-foreground">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 text-[11px] font-medium tracking-wide">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 text-[11px] font-medium tracking-wide min-w-0">
             {/* Left: Dateline Info (Short Form) */}
             <div className="flex items-center space-x-2 sm:space-x-2.5 text-muted-foreground font-medium shrink-0">
-              <span className="text-foreground font-semibold">
-                <span className="hidden sm:inline">{shortDate}</span>
-                <span className="sm:hidden">{compactDate}</span>
+              <span className="text-foreground font-semibold" suppressHydrationWarning>
+                <span className="hidden sm:inline" suppressHydrationWarning>{shortDate}</span>
+                <span className="sm:hidden" suppressHydrationWarning>{compactDate}</span>
               </span>
-
 
               <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">|</span>
               <span className="hidden sm:flex items-center gap-1">
@@ -85,7 +83,7 @@ export default function PublicHeader({ user }: PublicHeaderProps) {
             </div>
 
             {/* Right: Financial Markets Ticker (Placed at top right above search bar) */}
-            <div className="hidden md:flex items-center space-x-3 lg:space-x-4 font-mono text-[10px] lg:text-[11px] tracking-tight shrink-0">
+            <div className="hidden md:flex items-center space-x-2.5 lg:space-x-4 font-mono text-[10px] lg:text-[11px] tracking-tight min-w-0 overflow-x-auto no-scrollbar py-0.5">
               <span className="font-sans font-bold uppercase tracking-wider text-[10px] text-foreground flex items-center gap-1.5 shrink-0">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -93,31 +91,31 @@ export default function PublicHeader({ user }: PublicHeaderProps) {
                 </span>
                 MARKETS:
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 shrink-0">
                 <strong className="text-foreground font-semibold">S&amp;P 500</strong>
                 <span>5,632.40</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold">+0.48%</span>
               </span>
-              <span className="text-slate-300 dark:text-slate-700">·</span>
-              <span className="flex items-center gap-1">
+              <span className="text-slate-300 dark:text-slate-700 shrink-0">·</span>
+              <span className="flex items-center gap-1 shrink-0">
                 <strong className="text-foreground font-semibold">NASDAQ</strong>
                 <span>17,910.12</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold">+0.82%</span>
               </span>
-              <span className="text-slate-300 dark:text-slate-700">·</span>
-              <span className="flex items-center gap-1">
+              <span className="text-slate-300 dark:text-slate-700 hidden xl:inline">·</span>
+              <span className="hidden xl:flex items-center gap-1 shrink-0">
                 <strong className="text-foreground font-semibold">FTSE 100</strong>
                 <span>8,245.90</span>
                 <span className="text-red-600 dark:text-red-400 font-semibold">-0.15%</span>
               </span>
-              <span className="text-slate-300 dark:text-slate-700 hidden lg:inline">·</span>
-              <span className="hidden lg:flex items-center gap-1">
+              <span className="text-slate-300 dark:text-slate-700 hidden xl:inline">·</span>
+              <span className="hidden xl:flex items-center gap-1 shrink-0">
                 <strong className="text-foreground font-semibold">10Y Yield</strong>
                 <span>4.12%</span>
                 <span className="text-red-600 dark:text-red-400 font-semibold">-2 bps</span>
               </span>
               <span className="text-slate-300 dark:text-slate-700 hidden xl:inline">·</span>
-              <span className="hidden xl:flex items-center gap-1">
+              <span className="hidden xl:flex items-center gap-1 shrink-0">
                 <strong className="text-foreground font-semibold">Brent</strong>
                 <span>$78.45</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold">+1.1%</span>
@@ -169,23 +167,23 @@ export default function PublicHeader({ user }: PublicHeaderProps) {
 
           {/* DESKTOP MASTHEAD (>=md) */}
           <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 lg:py-3.5">
-            <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center justify-between gap-4 lg:gap-6 min-w-0">
               {/* Left Column: The Chronicle Title & Motto */}
-              <div className="flex flex-col items-start justify-center shrink-0">
+              <div className="flex flex-col items-start justify-center min-w-0 shrink">
                 <Link href="/" className="inline-block group">
                   <h1 className="font-serif text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground uppercase hover:opacity-90 transition-opacity leading-none">
                     The Chronicle
                   </h1>
                 </Link>
-                <p className="font-serif italic text-[11px] tracking-wide text-muted-foreground mt-1 font-medium">
-                  Veritas et Scientia · Independent Journalism Since 1894
+                <p className="font-serif italic text-[11px] tracking-wide text-muted-foreground mt-1 font-medium truncate max-w-full">
+                  Veritas et Scientia <span className="hidden xl:inline">· Independent Journalism Since 1894</span>
                 </p>
               </div>
 
               {/* Right Column: Search Bar & User Actions */}
-              <div className="flex items-center justify-end space-x-3.5 flex-1 max-w-2xl">
+              <div className="flex items-center justify-end space-x-2.5 sm:space-x-3.5 flex-1 max-w-2xl min-w-0">
                 {/* Search Bar on Right */}
-                <div className="w-56 lg:w-72">
+                <div className="w-40 sm:w-48 lg:w-72 min-w-0">
                   <HeaderSearch isFullWidth />
                 </div>
 
@@ -208,7 +206,7 @@ export default function PublicHeader({ user }: PublicHeaderProps) {
 
                 <Link
                   href="#newsletter"
-                  className="bg-primary hover:bg-primary-hover text-white text-xs font-bold px-4 py-2 rounded-md shadow-2xs transition-all inline-flex items-center gap-1 shrink-0"
+                  className="bg-primary hover:bg-primary-hover text-white text-xs font-bold px-3.5 sm:px-4 py-2 rounded-md shadow-2xs transition-all inline-flex items-center gap-1 shrink-0"
                 >
                   <span>Subscribe</span>
                 </Link>
@@ -244,7 +242,7 @@ export default function PublicHeader({ user }: PublicHeaderProps) {
         {/* ========================================================
             3. CATEGORY NAVIGATION BAR
             ======================================================== */}
-        <nav className="border-t border-border py-1.5 flex items-center justify-between overflow-x-auto no-scrollbar">
+        <nav className="border-t border-border py-1.5 flex items-center justify-between overflow-x-auto no-scrollbar w-full max-w-full">
           <ul className="flex items-center space-x-5 sm:space-x-8 text-xs sm:text-sm font-medium tracking-normal min-w-max mx-auto px-4">
             <li>
               <Link

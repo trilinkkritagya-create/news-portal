@@ -85,7 +85,7 @@ function CategorySectionContent({
       </div>
 
       {/* 3-Column Broadsheet Article Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredArticles.map((article) => {
           return (
             <article
@@ -133,7 +133,7 @@ function CategorySectionContent({
               </div>
 
               {/* Card Footer */}
-              <div className="pt-4 mt-4 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
+              <div className="pt-4 mt-4 border-t border-border flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
                 <div className="flex items-center gap-2">
                   {article.author.image && (
                     <Image

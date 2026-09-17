@@ -219,8 +219,63 @@
 }
 
 /* ==========================================================================
-   GLOBAL EDITORIAL DEFAULTS
+   TABLET SCREEN TYPOGRAPHY ENFORCEMENT (768px - 1279px)
+   Enforces that no text is smaller than 16px (1rem) on tablet viewports,
+   while mobile (< 768px) and desktop (>= 1280px) remain at normal sizes.
    ========================================================================== */
+@media (min-width: 768px) and (max-width: 1279px) {
+  :root {
+    --text-2xs: 1rem;
+    --text-xs: 1rem;
+    --text-xs--line-height: 1.4;
+    --text-sm: 1rem;
+    --text-sm--line-height: 1.45;
+  }
+
+  /* Base root sizing for tablet */
+  html,
+  body {
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+
+  /* All sub-16px utility classes and elements are elevated to minimum 16px */
+  .text-xs,
+  .text-sm,
+  [class*="text-xs"],
+  [class*="text-sm"],
+  [class*="text-[7px]"],
+  [class*="text-[8px]"],
+  [class*="text-[9px]"],
+  [class*="text-[10px]"],
+  [class*="text-[11px]"],
+  [class*="text-[12px]"],
+  [class*="text-[13px]"],
+  [class*="text-[14px]"],
+  [class*="text-[15px]"],
+  small,
+  figcaption {
+    font-size: 16px !important;
+    line-height: normal;
+  }
+
+  /* Preserve larger text utilities when combined with responsive classes */
+  [class*="text-base"] { font-size: 1rem !important; line-height: 1.5 !important; }
+  [class*="text-lg"] { font-size: 1.125rem !important; line-height: 1.5 !important; }
+  [class*="text-xl"] { font-size: 1.25rem !important; line-height: 1.4 !important; }
+  [class*="text-2xl"] { font-size: 1.5rem !important; line-height: 1.3 !important; }
+  [class*="text-3xl"] { font-size: 1.875rem !important; line-height: 1.2 !important; }
+  [class*="text-4xl"] { font-size: 2.25rem !important; line-height: 1.15 !important; }
+  [class*="text-5xl"] { font-size: 3rem !important; line-height: 1.1 !important; }
+  [class*="text-6xl"] { font-size: 3.75rem !important; line-height: 1 !important; }
+
+  [class*="md:text-base"] { font-size: 1rem !important; line-height: 1.5 !important; }
+  [class*="md:text-lg"] { font-size: 1.125rem !important; line-height: 1.5 !important; }
+  [class*="md:text-xl"] { font-size: 1.25rem !important; line-height: 1.4 !important; }
+  [class*="md:text-2xl"] { font-size: 1.5rem !important; line-height: 1.3 !important; }
+  [class*="md:text-3xl"] { font-size: 1.875rem !important; line-height: 1.2 !important; }
+  [class*="md:text-4xl"] { font-size: 2.25rem !important; line-height: 1.15 !important; }
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -345,13 +400,16 @@
   width: 6px;
   height: 6px;
 }
+
 .custom-editor-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-editor-scrollbar::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 9999px;
 }
+
 .custom-editor-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, User, Clock, Bookmark, Share2 } from "lucide-react";
 import { articleService } from "@/lib/services/article/article.service";
+import CommentSection from "@/components/public/CommentSection";
+import LikeButton from "@/components/public/LikeButton";
 
 interface ArticlePageProps {
   params: Promise<{
@@ -29,6 +31,8 @@ export default async function PublicArticlePage({ params }: ArticlePageProps) {
     day: "numeric",
     year: "numeric",
   });
+
+  const likeCount = (article as unknown as { _count?: { likes?: number } })._count?.likes ?? 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -111,27 +115,39 @@ export default async function PublicArticlePage({ params }: ArticlePageProps) {
           <div dangerouslySetInnerHTML={{ __html: article.content }} />
         </article>
 
-        {/* Footer Actions */}
-        <div className="pt-8 border-t border-border flex items-center justify-between text-xs font-mono text-muted-foreground">
-          <span>Article ID: {article.id}</span>
+        {/* Action Bar: Likes, Save, Share */}
+        <div className="pt-8 border-t border-border flex items-center justify-between text-xs font-mono text-muted-foreground flex-wrap gap-4">
+          <LikeButton
+            articleId={article.id}
+            allowLikes={article.allowLikes}
+            initialLikeCount={likeCount}
+          />
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="flex items-center gap-1 border border-border bg-card px-3 py-1.5 rounded hover:bg-secondary transition-colors cursor-pointer"
+              className="flex items-center gap-1 border border-border bg-card px-3 py-1.5 rounded hover:bg-secondary transition-colors cursor-pointer text-xs font-mono"
             >
               <Bookmark className="w-3.5 h-3.5" />
               Save
             </button>
             <button
               type="button"
-              className="flex items-center gap-1 border border-border bg-card px-3 py-1.5 rounded hover:bg-secondary transition-colors cursor-pointer"
+              className="flex items-center gap-1 border border-border bg-card px-3 py-1.5 rounded hover:bg-secondary transition-colors cursor-pointer text-xs font-mono"
             >
               <Share2 className="w-3.5 h-3.5" />
               Share
             </button>
           </div>
         </div>
+
+        {/* Comments Section */}
+        <CommentSection
+          articleId={article.id}
+          allowComments={article.allowComments}
+          initialComments={article.comments}
+        />
       </main>
     </div>
   );
 }
+

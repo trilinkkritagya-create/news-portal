@@ -62,16 +62,16 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
       {/* Header with Title and Mobile Slider Controls */}
       <div className="flex items-center justify-between mb-3.5">
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+          <h2 className="text-base font-semibold tracking-wider text-muted-foreground uppercase">
             Reader Telemetry &amp; Activity
           </h2>
-          <span className="text-[11px] font-mono text-muted-foreground lg:hidden">
+          <span className="text-base font-mono text-muted-foreground xl:hidden">
             ({activeIndex + 1}/4)
           </span>
         </div>
 
         {/* Slider Controls for Mobile & Tablet */}
-        <div className="flex items-center gap-1.5 lg:hidden">
+        <div className="flex items-center gap-1.5 xl:hidden">
           <button
             type="button"
             onClick={() => scroll("left")}
@@ -95,12 +95,12 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
       <div
         ref={sliderRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto gap-4 pb-2 pt-1 snap-x snap-mandatory scroll-smooth no-scrollbar lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:pb-0"
+        className="flex overflow-x-auto gap-4 pb-2 pt-1 snap-x snap-mandatory scroll-smooth no-scrollbar xl:grid xl:grid-cols-4 xl:gap-4 xl:overflow-visible xl:pb-0"
       >
         {/* Card 1: Saved Articles */}
         <a
           href="#saved-articles"
-          className="group relative flex w-[82vw] max-w-[310px] sm:w-[320px] lg:w-auto shrink-0 lg:shrink snap-start flex-col justify-between border border-border bg-card p-5 rounded-lg transition-all hover:border-foreground/30 hover:shadow-sm"
+          className="group relative flex w-[82vw] max-w-[310px] sm:w-[320px] xl:w-auto shrink-0 xl:shrink snap-start flex-col justify-between border border-border bg-card p-5 rounded-lg transition-all hover:border-foreground/30 hover:shadow-sm"
         >
           <div>
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium mb-2">
@@ -123,7 +123,7 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
         </a>
 
         {/* Card 2: Liked Articles */}
-        <div className="relative flex w-[82vw] max-w-[310px] sm:w-[320px] lg:w-auto shrink-0 lg:shrink snap-start flex-col justify-between border border-border bg-card p-5 rounded-lg">
+        <div className="relative flex w-[82vw] max-w-[310px] sm:w-[320px] xl:w-auto shrink-0 xl:shrink snap-start flex-col justify-between border border-border bg-card p-5 rounded-lg">
           <div>
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium mb-2">
               <span className="text-xs">Stories Appreciated</span>
@@ -147,7 +147,7 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
         {/* Card 3: Comments Posted */}
         <a
           href="#community-comments"
-          className="group relative flex w-[82vw] max-w-[310px] sm:w-[320px] lg:w-auto shrink-0 lg:shrink snap-start flex-col justify-between border border-border bg-card p-5 rounded-lg transition-all hover:border-foreground/30 hover:shadow-sm"
+          className="group relative flex w-[82vw] max-w-[310px] sm:w-[320px] xl:w-auto shrink-0 xl:shrink snap-start flex-col justify-between border border-border bg-card p-5 rounded-lg transition-all hover:border-foreground/30 hover:shadow-sm"
         >
           <div>
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium mb-2">
@@ -170,7 +170,7 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
         </a>
 
         {/* Card 4: Reading Streak */}
-        <div className="relative flex w-[82vw] max-w-[310px] sm:w-[320px] lg:w-auto shrink-0 lg:shrink snap-start flex-col justify-between border border-border bg-card p-5 rounded-lg">
+        <div className="relative flex w-[82vw] max-w-[310px] sm:w-[320px] xl:w-auto shrink-0 xl:shrink snap-start flex-col justify-between border border-border bg-card p-5 rounded-lg">
           <div>
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium mb-2">
               <span className="text-xs">Reading Streak</span>
@@ -195,7 +195,7 @@ export default function MemberMetricCards({ stats }: MemberMetricCardsProps) {
       </div>
 
       {/* Pagination Dot Indicators for Mobile */}
-      <div className="flex items-center justify-center gap-1.5 mt-2 lg:hidden">
+      <div className="flex items-center justify-center gap-1.5 mt-2 xl:hidden">
         {[0, 1, 2, 3].map((i) => (
           <button
             key={i}
