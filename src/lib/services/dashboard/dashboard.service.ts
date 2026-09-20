@@ -7,6 +7,8 @@ import {
   MemberDashboardArticle,
   MemberDashboardData,
 } from "@/lib/types/dashboard.types";
+import { GetArticlesInput } from "@/lib/types/articles.types";
+import { articleService } from "@/lib/services/article/article.service";
 
 class DashboardService {
   async getAuthorDashboard(userId: string) {
@@ -23,6 +25,7 @@ class DashboardService {
         totalComments,
         totalShares,
         recentArticles,
+        categories,
       ] = await Promise.all([
         prisma.article.count({
           where: articleWhere,
@@ -93,6 +96,19 @@ class DashboardService {
             },
           },
         }),
+
+        prisma.category.findMany({
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            _count: {
+              select: {
+                articles: true,
+              },
+            },
+          },
+        }),
       ]);
 
       return {
@@ -108,10 +124,16 @@ class DashboardService {
         },
 
         recentArticles,
+
+        categories,
       };
     } catch (error) {
       throw normalizeError(error, ErrorResource.STATS);
     }
+  }
+
+  async getFilteredArticles(input: GetArticlesInput) {
+    return articleService.getFilteredArticles(input);
   }
 
   async getAdminDashboard() {

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { History, CheckCircle2, Clock3 } from "lucide-react";
-import { MockArticle } from "@/lib/mock-data";
 import { MemberReadingHistoryItem } from "@/lib/types/dashboard.types";
 
 interface MemberReadingHistoryProps {
@@ -31,12 +30,11 @@ export default function MemberReadingHistory({
       </div>
 
       {/* History Items */}
-      <div className="divide-y divide-border">
+      {/* <div className="divide-y divide-border">
         {history.map((item, idx) => {
           const isComplete = item.progress === "100%";
           const progressPercent =
             parseInt(item.progress.replace("%", ""), 10) || 0;
-
           return (
             <div
               key={idx}
@@ -72,7 +70,6 @@ export default function MemberReadingHistory({
                 </p>
               </div>
 
-              {/* Progress Indicator */}
               <div className="w-full sm:w-36 shrink-0 flex items-center sm:flex-col sm:items-end gap-2 sm:gap-1.5">
                 <div className="flex items-center gap-1.5 text-xs font-mono">
                   {isComplete ? (
@@ -98,7 +95,7 @@ export default function MemberReadingHistory({
             </div>
           );
         })}
-      </div>
+      </div> */}
     </div>
   );
 }

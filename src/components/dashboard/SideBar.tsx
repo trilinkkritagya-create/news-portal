@@ -225,10 +225,10 @@ function SidebarContent({
                 {user?.email || "mod-desk@newsportal.press"}
               </span>
             </div>
-            <p className="text-[11px] text-muted-foreground leading-snug">
+            {/* <p className="text-[11px] text-muted-foreground leading-snug">
               AP &amp; Reuters terminal live sync active. All economic desk
               dispatches queued.
-            </p>
+            </p> */}
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
@@ -322,7 +322,9 @@ const SidebarItem = ({
       <div className="flex items-center gap-3">
         <Icon
           className={`h-4 w-4 shrink-0 transition-colors ${
-            active ? "text-white fill-white/20" : "text-[#cbdbf5] group-hover:text-white"
+            active
+              ? "text-white fill-white/20"
+              : "text-[#cbdbf5] group-hover:text-white"
           }`}
         />
         <span>{label}</span>

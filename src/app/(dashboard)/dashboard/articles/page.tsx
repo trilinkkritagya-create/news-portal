@@ -1,19 +1,29 @@
-import React from "react";
 import { getCurrentUser } from "@/lib/auth/authLib";
-import { getDashboardData } from "@/lib/dashboard/get-dashboard-data";
-import ArticlesManagementView from "@/components/dashboard/ArticlesManagementView";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import ArticlesActionTable from "@/components/dashboard/articles/ArticlesActionTable";
+import { articleService } from "@/lib/services/article/article.service";
 
 export default async function ArticlesPage() {
   const user = await getCurrentUser();
-  const data = await getDashboardData(user?.role, user?.id);
+  const articleData = await articleService.getFilteredArticles({
+    page: 1,
+    limit: 10,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
+  console.log(articleData, "is article data");
 
   return (
-    <div className="flex flex-1 flex-col min-h-screen bg-[#F8FAFC] dark:bg-[#090e17] text-foreground">
-      {/* Interactive Articles Management View with Integrated Sticky Top Nav */}
-      <ArticlesManagementView
-        initialArticles={data.recentArticles}
-        stats={data.stats}
-      />
+    <div className="flex min-h-screen flex-1 flex-col bg-[#F8FAFC] text-foreground dark:bg-[#090e17]">
+      <DashboardHeader />
+      <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <ArticlesActionTable
+          articles={articleData.articles}
+          currentUserId={user?.id ?? ""}
+          userRole={user?.role}
+          pagination={articleData.pagination}
+        />
+      </main>
     </div>
   );
 }

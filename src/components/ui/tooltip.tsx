@@ -50,44 +50,30 @@ export default function Tooltip({
   };
 
   return (
-    <span className="group relative inline-flex shrink-0">
+    <span className="group relative inline-block w-fit">
       {children}
 
       <span
         role="tooltip"
         className={cn(
           "pointer-events-none absolute z-[2147483647]",
-
-          // Size
           "w-max max-w-xs",
-
-          // Appearance
           "rounded-md px-2.5 py-1.5",
           "bg-black text-white",
           "border border-white/10",
           "shadow-lg shadow-black/20",
           "text-[11px] font-medium leading-tight",
           "whitespace-nowrap",
-
-          // Hidden
           "invisible opacity-0",
-
-          // Show ONLY when this wrapper is hovered
           "group-hover:visible group-hover:opacity-100",
-
-          // Animation
           "transition-opacity duration-150 ease-out",
-
-          // Position
           positionStyles[position],
-
           className,
         )}
         style={offsetStyle[position]}
       >
         {content}
 
-        {/* Arrow */}
         <span
           className={cn(
             "absolute h-0 w-0",

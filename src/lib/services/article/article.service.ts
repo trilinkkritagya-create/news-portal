@@ -3,14 +3,15 @@ import { ArticleStatus, UserRole } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { Errors } from "@/lib/errors/errors";
 import { ErrorResource } from "@/lib/errors/errors-resource";
+import { normalizeError } from "@/lib/errors/normalizeError";
 import { generateSlug } from "@/lib/utils/slug";
 import sanitizeHtml from "sanitize-html";
+import { GetArticlesInput } from "@/lib/types/articles.types";
 
 interface CreateArticleInput {
   title: string;
   content: string;
   excerpt?: string;
-  //   image?: string | undefined;
 }
 
 interface AuthenticatedUser {
@@ -21,13 +22,20 @@ export interface UpdateArticleInput {
   title?: string;
   content?: string;
   excerpt?: string;
+  allowLikes?: boolean;
+  allowComments?: boolean;
+  // allowShares?: boolean;
 }
-
-export interface updateArticleFeatureInput {
+export interface UpdateArticleFeaturesInput {
   allowLikes?: boolean;
   allowComments?: boolean;
   allowShares?: boolean;
 }
+// export interface updateArticleFeatureInput {
+//   allowLikes?: boolean;
+//   allowComments?: boolean;
+//   allowShares?: boolean;
+// }
 
 export interface CreateCommentInput {
   articleId: string;
@@ -214,6 +222,13 @@ class ArticleService {
           title: data.title,
           content: data.content,
           excerpt: data.excerpt,
+          ...(data.allowLikes !== undefined && {
+            allowLikes: data.allowLikes,
+          }),
+
+          ...(data.allowComments !== undefined && {
+            allowComments: data.allowComments,
+          }),
           slug,
         },
       });
@@ -359,17 +374,17 @@ class ArticleService {
   }
   async updateArticlesFeatures(
     articleId: string,
-    data: updateArticleFeatureInput,
+    data: UpdateArticleFeaturesInput,
     user: AuthenticatedUser,
   ) {
     try {
       if (user.role !== UserRole.ADMIN) {
         throw Errors.forbidden(
-          "Only admin can manage article features",
+          "Only administrators can manage article features.",
           ErrorResource.ARTICLE,
         );
       }
-      console.log(data.allowLikes, "Is allow likes");
+
       const article = await prisma.article.findUnique({
         where: {
           id: articleId,
@@ -378,22 +393,25 @@ class ArticleService {
           id: true,
         },
       });
-      console.log(article, "article obtained");
+
       if (!article) {
-        throw Errors.notFound("Article not found", ErrorResource.ARTICLE);
+        throw Errors.notFound("Article not found.", ErrorResource.ARTICLE);
       }
       const updatedArticle = await prisma.article.update({
         where: {
           id: articleId,
         },
+
         data: {
           ...(data.allowLikes !== undefined && {
             allowLikes: data.allowLikes,
           }),
+
           ...(data.allowComments !== undefined && {
             allowComments: data.allowComments,
           }),
         },
+
         select: {
           id: true,
           title: true,
@@ -401,10 +419,17 @@ class ArticleService {
           allowComments: true,
         },
       });
-      console.log(updatedArticle, "updated article");
+
       return updatedArticle;
     } catch (error) {
-      throw error;
+      console.error("updateArticlesFeatures error:", error);
+
+      if (error instanceof Error) {
+        console.error("message:", error.message);
+        console.error("name:", error.name);
+        // console.error("stack:", error.stack);
+      }
+      throw normalizeError(error, ErrorResource.ARTICLE);
     }
   }
   async toggleLike(articleId: string, user: AuthenticatedUser) {
@@ -518,6 +543,148 @@ class ArticleService {
     } catch (error) {
       console.error("Create comment error:", error);
       throw error;
+    }
+  }
+
+  async getFilteredArticles(input: GetArticlesInput) {
+    try {
+      const {
+        page = 1,
+        limit = 4,
+        search,
+        status,
+        category,
+        authorId,
+        sortBy = "createdAt",
+        sortOrder = "desc",
+      } = input;
+
+      const safePage = Math.max(1, page);
+      const safeLimit = Math.max(1, limit);
+
+      const skip = (safePage - 1) * safeLimit;
+
+      const where = {
+        ...(status &&
+          status !== "ALL" && {
+            status,
+          }),
+
+        ...(category &&
+          category !== "ALL" && {
+            category: {
+              slug: category,
+            },
+          }),
+
+        ...(authorId && {
+          authorId,
+        }),
+
+        ...(search &&
+          search.trim() !== "" && {
+            OR: [
+              {
+                title: {
+                  contains: search.trim(),
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                excerpt: {
+                  contains: search.trim(),
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                author: {
+                  name: {
+                    contains: search.trim(),
+                    mode: "insensitive" as const,
+                  },
+                },
+              },
+              {
+                category: {
+                  name: {
+                    contains: search.trim(),
+                    mode: "insensitive" as const,
+                  },
+                },
+              },
+            ],
+          }),
+      };
+
+      const [articles, total] = await Promise.all([
+        prisma.article.findMany({
+          where,
+          skip,
+          take: safeLimit,
+
+          orderBy: {
+            [sortBy]: sortOrder,
+          },
+
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            status: true,
+            createdAt: true,
+            publishedAt: true,
+
+            allowLikes: true,
+            allowComments: true,
+
+            author: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
+            },
+
+            category: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+
+            _count: {
+              select: {
+                likes: true,
+                comments: true,
+                shares: true,
+              },
+            },
+          },
+        }),
+
+        prisma.article.count({
+          where,
+        }),
+      ]);
+
+      const totalPages = Math.ceil(total / safeLimit) || 1;
+
+      return {
+        articles,
+
+        pagination: {
+          page: safePage,
+          limit: safeLimit,
+          total,
+          totalPages,
+          hasNextPage: safePage < totalPages,
+          hasPreviousPage: safePage > 1,
+        },
+      };
+    } catch (error) {
+      throw normalizeError(error, ErrorResource.ARTICLE);
     }
   }
 }

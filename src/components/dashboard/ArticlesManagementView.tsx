@@ -9,52 +9,54 @@ import {
   Search,
   Download,
   Trash2,
-  Check,
   ExternalLink,
-  ChevronDown,
   X,
   Loader2,
   PenSquare,
   Newspaper,
   CheckCircle2,
   Clock,
-  Eye,
-  TrendingUp,
   RotateCcw,
   Edit,
   AlertTriangle,
   SlidersHorizontal,
   FileText,
-  Sparkles,
 } from "lucide-react";
-import { DashboardArticleItem, DashboardStats } from "@/lib/dashboard/get-dashboard-data";
+import {
+  DashboardArticleItem,
+  DashboardStats,
+} from "@/lib/dashboard/get-dashboard-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useSidebar } from "./SidebarContext";
+import ArticleStatusBadge from "../ui/ArticleStatusBadge";
+import DashboardHeader from "./DashboardHeader";
 
 interface ArticlesManagementViewProps {
   initialArticles: DashboardArticleItem[];
   stats?: DashboardStats;
 }
-
 const PAGE_SIZE = 10;
-
 export default function ArticlesManagementView({
   initialArticles,
-  stats,
 }: ArticlesManagementViewProps) {
   const router = useRouter();
   const { toggle, setCustomSidebarContent } = useSidebar();
 
-  const [articles, setArticles] = useState<DashboardArticleItem[]>(initialArticles);
+  const [articles, setArticles] =
+    useState<DashboardArticleItem[]>(initialArticles);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
-  const [sortBy, setSortBy] = useState<"newest" | "title" | "category">("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "title" | "category">(
+    "newest",
+  );
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Deletion modal state
-  const [deleteTarget, setDeleteTarget] = useState<DashboardArticleItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DashboardArticleItem | null>(
+    null,
+  );
   const [isDeleting, setIsDeleting] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
@@ -74,18 +76,20 @@ export default function ArticlesManagementView({
     return Array.from(cats);
   }, [articles]);
 
-  // Counts for pills
   const counts = useMemo(() => {
     const active = articles.filter((a) => !deletedIds.includes(a.id));
     return {
       all: active.length,
       published: active.filter((a) => a.status === "PUBLISHED").length,
       draft: active.filter((a) => a.status === "DRAFT").length,
-      review: active.filter((a) => (a.status as string) === "ARCHIVED" || (a.status as string) === "IN_REVIEW").length,
+      review: active.filter(
+        (a) =>
+          (a.status as string) === "ARCHIVED" ||
+          (a.status as string) === "IN_REVIEW",
+      ).length,
     };
   }, [articles, deletedIds]);
 
-  // Filtered and sorted articles
   const filteredArticles = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return articles
@@ -95,7 +99,10 @@ export default function ArticlesManagementView({
         // Status filter
         if (statusFilter !== "ALL") {
           if (statusFilter === "REVIEW") {
-            if ((article.status as string) !== "ARCHIVED" && (article.status as string) !== "IN_REVIEW") {
+            if (
+              (article.status as string) !== "ARCHIVED" &&
+              (article.status as string) !== "IN_REVIEW"
+            ) {
               return false;
             }
           } else if (article.status !== statusFilter) {
@@ -104,16 +111,25 @@ export default function ArticlesManagementView({
         }
 
         // Category filter
-        if (categoryFilter !== "ALL" && article.categoryName !== categoryFilter) {
+        if (
+          categoryFilter !== "ALL" &&
+          article.categoryName !== categoryFilter
+        ) {
           return false;
         }
 
         // Search query
         if (q) {
           const matchTitle = (article.title || "").toLowerCase().includes(q);
-          const matchAuthor = (article.authorName || "").toLowerCase().includes(q);
-          const matchCategory = (article.categoryName || "").toLowerCase().includes(q);
-          const matchExcerpt = (article.excerpt || "").toLowerCase().includes(q);
+          const matchAuthor = (article.authorName || "")
+            .toLowerCase()
+            .includes(q);
+          const matchCategory = (article.categoryName || "")
+            .toLowerCase()
+            .includes(q);
+          const matchExcerpt = (article.excerpt || "")
+            .toLowerCase()
+            .includes(q);
           if (!matchTitle && !matchAuthor && !matchCategory && !matchExcerpt) {
             return false;
           }
@@ -158,7 +174,9 @@ export default function ArticlesManagementView({
       setDeleteTarget(null);
       router.refresh();
     } catch (err: unknown) {
-      showToast(err instanceof Error ? err.message : "Failed to delete article.");
+      showToast(
+        err instanceof Error ? err.message : "Failed to delete article.",
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -183,7 +201,7 @@ export default function ArticlesManagementView({
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `chronicle-dispatches-${new Date().toISOString().slice(0, 10)}.csv`
+      `chronicle-dispatches-${new Date().toISOString().slice(0, 10)}.csv`,
     );
     document.body.appendChild(link);
     link.click();
@@ -206,7 +224,9 @@ export default function ArticlesManagementView({
             <SlidersHorizontal className="h-3.5 w-3.5" />
             <span>Article Filters</span>
           </div>
-          {(statusFilter !== "ALL" || categoryFilter !== "ALL" || searchQuery) && (
+          {(statusFilter !== "ALL" ||
+            categoryFilter !== "ALL" ||
+            searchQuery) && (
             <button
               type="button"
               onClick={resetFilters}
@@ -234,7 +254,9 @@ export default function ArticlesManagementView({
               }`}
             >
               <span>All</span>
-              <span className="text-[10px] font-mono opacity-80">{counts.all}</span>
+              <span className="text-[10px] font-mono opacity-80">
+                {counts.all}
+              </span>
             </button>
             <button
               type="button"
@@ -246,7 +268,9 @@ export default function ArticlesManagementView({
               }`}
             >
               <span>Published</span>
-              <span className="text-[10px] font-mono opacity-80">{counts.published}</span>
+              <span className="text-[10px] font-mono opacity-80">
+                {counts.published}
+              </span>
             </button>
             <button
               type="button"
@@ -258,7 +282,9 @@ export default function ArticlesManagementView({
               }`}
             >
               <span>Draft</span>
-              <span className="text-[10px] font-mono opacity-80">{counts.draft}</span>
+              <span className="text-[10px] font-mono opacity-80">
+                {counts.draft}
+              </span>
             </button>
             <button
               type="button"
@@ -270,7 +296,9 @@ export default function ArticlesManagementView({
               }`}
             >
               <span>In Review</span>
-              <span className="text-[10px] font-mono opacity-80">{counts.review}</span>
+              <span className="text-[10px] font-mono opacity-80">
+                {counts.review}
+              </span>
             </button>
           </div>
         </div>
@@ -301,7 +329,9 @@ export default function ArticlesManagementView({
           </label>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as "newest" | "title" | "category")}
+            onChange={(e) =>
+              setSortBy(e.target.value as "newest" | "title" | "category")
+            }
             className="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 font-sans cursor-pointer"
           >
             <option value="newest">Newest First</option>
@@ -345,7 +375,7 @@ export default function ArticlesManagementView({
           <Download className="h-3.5 w-3.5 text-slate-400" />
           <span>Export Dispatches (.CSV)</span>
         </button>
-      </div>
+      </div>,
     );
 
     return () => {
@@ -362,55 +392,55 @@ export default function ArticlesManagementView({
     filteredArticles,
   ]);
 
-  const renderStatusBadge = (status: string) => {
-    if (status === "PUBLISHED") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-800">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
-          Published
-        </span>
-      );
-    }
-    if (status === "DRAFT") {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/70 dark:border-amber-800">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-400" />
-          Draft
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/70 dark:border-blue-800">
-        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-        In Review
-      </span>
-    );
-  };
+  // const renderStatusBadge = (status: string) => {
+  //   if (status === "PUBLISHED") {
+  //     return (
+  //       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-800">
+  //         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+  //         Published
+  //       </span>
+  //     );
+  //   }
+  //   if (status === "DRAFT") {
+  //     return (
+  //       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/70 dark:border-amber-800">
+  //         <span className="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-400" />
+  //         Draft
+  //       </span>
+  //     );
+  //   }
+  //   return (
+  //     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/70 dark:border-blue-800">
+  //       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+  //       In Review
+  //     </span>
+  //   );
+  // };
 
   return (
     <div className="flex flex-1 flex-col min-h-screen">
       {/* Toast Feedback */}
-      {actionFeedback && (
+      {/* {actionFeedback && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 rounded-lg shadow-xl border border-slate-700 text-xs font-mono animate-in fade-in slide-in-from-bottom-3 duration-200">
           <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
           <span>{actionFeedback}</span>
         </div>
-      )}
+      )} */}
+      <DashboardHeader />
 
       {/* ==================== STICKY TOP EDITORIAL NAV BAR ==================== */}
-      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-[#CBD5E1] dark:border-slate-700 bg-[#E2E8F0] dark:bg-[#1E293B] px-4 sm:px-6 lg:px-8 shadow-xs gap-2">
-        {/* Mobile & Tablet Left Area: Hamburger + Section Title + Compact Status */}
+      <header className="sticky top-0 z-30 flex shrink-0 items-center justify-between border-b border-[#CBD5E1] dark:border-slate-700 bg-[#E2E8F0] dark:bg-[#1E293B] px-4 sm:px-6 lg:px-8 shadow-xs gap-2">
         <div className="flex items-center gap-2.5 xl:hidden min-w-0">
-          <button
+          {/* <button
             type="button"
             onClick={toggle}
             className="inline-flex size-8.5 items-center justify-center rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer shrink-0 transition-colors shadow-2xs"
             aria-label="Toggle navigation drawer"
           >
             <Menu className="h-4.5 w-4.5" />
-          </button>
+          </button> */}
 
-          <div className="flex items-center gap-2 min-w-0">
+          {/* <div className="flex items-center gap-2 min-w-0">
             <h1 className="font-serif font-bold text-base text-foreground tracking-tight truncate">
               Article
             </h1>
@@ -419,10 +449,10 @@ export default function ArticlesManagementView({
                 statusFilter === "DRAFT"
                   ? "bg-amber-50 text-amber-700 dark:text-amber-300 border-amber-300/80 dark:border-amber-700"
                   : statusFilter === "PUBLISHED"
-                  ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300 border-emerald-300/80 dark:border-emerald-700"
-                  : statusFilter === "REVIEW"
-                  ? "bg-blue-50 text-blue-700 dark:text-blue-300 border-blue-300/80 dark:border-blue-700"
-                  : "bg-white text-[#881337] dark:text-rose-400 border-slate-200 dark:border-slate-700 dark:bg-slate-800"
+                    ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300 border-emerald-300/80 dark:border-emerald-700"
+                    : statusFilter === "REVIEW"
+                      ? "bg-blue-50 text-blue-700 dark:text-blue-300 border-blue-300/80 dark:border-blue-700"
+                      : "bg-white text-[#881337] dark:text-rose-400 border-slate-200 dark:border-slate-700 dark:bg-slate-800"
               }`}
             >
               <span
@@ -430,10 +460,10 @@ export default function ArticlesManagementView({
                   statusFilter === "DRAFT"
                     ? "bg-amber-500 animate-pulse"
                     : statusFilter === "PUBLISHED"
-                    ? "bg-emerald-500"
-                    : statusFilter === "REVIEW"
-                    ? "bg-blue-500"
-                    : "bg-[#881337] animate-pulse"
+                      ? "bg-emerald-500"
+                      : statusFilter === "REVIEW"
+                        ? "bg-blue-500"
+                        : "bg-[#881337] animate-pulse"
                 }`}
               />
               <span className="capitalize truncate">
@@ -441,21 +471,21 @@ export default function ArticlesManagementView({
                 {statusFilter === "ALL"
                   ? counts.all
                   : statusFilter === "PUBLISHED"
-                  ? counts.published
-                  : statusFilter === "DRAFT"
-                  ? counts.draft
-                  : counts.review}
+                    ? counts.published
+                    : statusFilter === "DRAFT"
+                      ? counts.draft
+                      : counts.review}
                 )
               </span>
             </span>
-          </div>
+          </div> */}
         </div>
 
         {/* Desktop Left / Center Area: Filters in Navbar */}
-        <div className="hidden xl:flex items-center gap-2.5 2xl:gap-3 flex-1 min-w-0 mr-2">
-          {/* Segmented Status Filter Pills */}
+
+        {/* <div className="hidden xl:flex items-center gap-2.5 2xl:gap-3 flex-1 min-w-0 mr-2">
+
           <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-200/90 dark:border-slate-700 shadow-2xs shrink-0">
-            {/* All Dispatches */}
             <button
               type="button"
               onClick={() => setStatusFilter("ALL")}
@@ -477,7 +507,6 @@ export default function ArticlesManagementView({
               </span>
             </button>
 
-            {/* Published */}
             <button
               type="button"
               onClick={() => setStatusFilter("PUBLISHED")}
@@ -499,7 +528,6 @@ export default function ArticlesManagementView({
               </span>
             </button>
 
-            {/* Draft */}
             <button
               type="button"
               onClick={() => setStatusFilter("DRAFT")}
@@ -521,7 +549,6 @@ export default function ArticlesManagementView({
               </span>
             </button>
 
-            {/* In Review */}
             <button
               type="button"
               onClick={() => setStatusFilter("REVIEW")}
@@ -544,9 +571,7 @@ export default function ArticlesManagementView({
             </button>
           </div>
 
-          <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 shrink-0" />
 
-          {/* Desk Dropdown */}
           <div className="relative shrink-0">
             <select
               value={categoryFilter}
@@ -563,7 +588,7 @@ export default function ArticlesManagementView({
             </select>
           </div>
 
-          {/* Sort Dropdown */}
+
           <div className="relative shrink-0">
             <select
               value={sortBy}
@@ -579,7 +604,7 @@ export default function ArticlesManagementView({
             </select>
           </div>
 
-          {/* Search Bar */}
+
           <div className="relative flex-1 max-w-xs min-w-[180px]">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-500 dark:text-slate-400 pointer-events-none" />
             <input
@@ -599,11 +624,10 @@ export default function ArticlesManagementView({
               </button>
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Right Controls: Export + Create Article + Bell */}
-        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-          {/* Export CSV (desktop) */}
+        {/* <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
           <button
             type="button"
             onClick={handleExportCSV}
@@ -614,7 +638,6 @@ export default function ArticlesManagementView({
             <span className="hidden md:inline">Export</span>
           </button>
 
-          {/* Create Article Button */}
           <Link
             href="/dashboard/articles/create"
             className="inline-flex items-center justify-center gap-1.5 h-8.5 px-3 rounded-lg bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white text-xs font-medium transition-all duration-150 shadow-xs hover:shadow active:scale-98 shrink-0"
@@ -624,7 +647,6 @@ export default function ArticlesManagementView({
             <span className="sm:hidden">Create</span>
           </Link>
 
-          {/* Bell Icon */}
           <button
             type="button"
             aria-label="Notifications"
@@ -633,14 +655,11 @@ export default function ArticlesManagementView({
             <Bell className="h-4 w-4" />
             <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-red-600 ring-2 ring-card animate-pulse"></span>
           </button>
-        </div>
+        </div> */}
       </header>
 
-      {/* ==================== MAIN WORKSTATION CONTAINER ==================== */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-[1550px] w-full mx-auto">
-        {/* ==================== 1. TOP STATS CARDS (4-Column Grid) ==================== */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-          {/* Card 1: Total Dispatches */}
           <div
             onClick={() => setStatusFilter("ALL")}
             className={`cursor-pointer bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs transition-all ${
@@ -668,7 +687,6 @@ export default function ArticlesManagementView({
             </div>
           </div>
 
-          {/* Card 2: Published Live */}
           <div
             onClick={() => setStatusFilter("PUBLISHED")}
             className={`cursor-pointer bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs transition-all ${
@@ -696,7 +714,6 @@ export default function ArticlesManagementView({
             </div>
           </div>
 
-          {/* Card 3: Draft Staging */}
           <div
             onClick={() => setStatusFilter("DRAFT")}
             className={`cursor-pointer bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs transition-all ${
@@ -724,7 +741,6 @@ export default function ArticlesManagementView({
             </div>
           </div>
 
-          {/* Card 4: Editorial Review */}
           <div
             onClick={() => setStatusFilter("REVIEW")}
             className={`cursor-pointer bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs transition-all ${
@@ -753,9 +769,7 @@ export default function ArticlesManagementView({
           </div>
         </section>
 
-        {/* ==================== 2. MAIN ARTICLES WORKBENCH TABLE ==================== */}
         <section className="bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl shadow-xs overflow-hidden flex flex-col">
-          {/* Table Header Strip */}
           <div className="p-3.5 sm:p-4 border-b border-[#E2E8F0] dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
             <div className="flex items-center gap-2">
               <h2 className="font-serif font-bold text-base text-foreground">
@@ -766,7 +780,9 @@ export default function ArticlesManagementView({
               </span>
             </div>
 
-            {(categoryFilter !== "ALL" || statusFilter !== "ALL" || searchQuery) && (
+            {(categoryFilter !== "ALL" ||
+              statusFilter !== "ALL" ||
+              searchQuery) && (
               <button
                 type="button"
                 onClick={resetFilters}
@@ -778,7 +794,6 @@ export default function ArticlesManagementView({
             )}
           </div>
 
-          {/* Desktop & Tablet Table */}
           <div className="hidden sm:block overflow-x-auto no-scrollbar">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
@@ -819,16 +834,22 @@ export default function ArticlesManagementView({
                 ) : (
                   displayedArticles.map((article) => {
                     const formattedDate = article.publishedAt
-                      ? new Date(article.publishedAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })
-                      : new Date(article.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        });
+                      ? new Date(article.publishedAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )
+                      : new Date(article.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        );
 
                     const authorInitial = (
                       article.authorName?.[0] || "A"
@@ -841,7 +862,8 @@ export default function ArticlesManagementView({
                       >
                         {/* Status */}
                         <td className="py-3 pl-4 pr-2 whitespace-nowrap">
-                          {renderStatusBadge(article.status)}
+                          {/* {renderStatusBadge(article.status)} */}
+                          <ArticleStatusBadge status={article.status} />
                         </td>
 
                         {/* Headline */}
@@ -957,7 +979,7 @@ export default function ArticlesManagementView({
                     >
                       {article.categoryName}
                     </span>
-                    {renderStatusBadge(article.status)}
+                    <ArticleStatusBadge status={article.status} />
                   </div>
 
                   <Link
@@ -999,14 +1021,13 @@ export default function ArticlesManagementView({
                 onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
                 className="px-4 py-1.5 text-xs font-mono font-medium rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-foreground transition-colors shadow-2xs cursor-pointer"
               >
-                Load More Dispatches ({filteredArticles.length - visibleCount} remaining)
+                Load More Dispatches ({filteredArticles.length - visibleCount}{" "}
+                remaining)
               </button>
             </div>
           )}
         </section>
       </main>
-
-      {/* ==================== DELETE MODAL ==================== */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
@@ -1019,7 +1040,8 @@ export default function ArticlesManagementView({
                   Confirm Dispatch Deletion
                 </h3>
                 <p className="text-xs text-muted-foreground font-sans">
-                  This action is permanent and will purge the story from publishing archives.
+                  This action is permanent and will purge the story from
+                  publishing archives.
                 </p>
               </div>
             </div>
@@ -1029,7 +1051,8 @@ export default function ArticlesManagementView({
                 {deleteTarget.title}
               </div>
               <div className="text-[10px] text-muted-foreground font-mono mt-1">
-                Desk: {deleteTarget.categoryName} · Author: {deleteTarget.authorName}
+                Desk: {deleteTarget.categoryName} · Author:{" "}
+                {deleteTarget.authorName}
               </div>
             </div>
 

@@ -40,6 +40,9 @@ export type UpdateArticleState = {
     article: {
       id: string;
       title: string;
+      allowLikes: boolean;
+      allowComments: boolean;
+      // allowShares: boolean;
     };
   };
 };
@@ -152,7 +155,6 @@ export async function createArticleAction(
     };
   } catch (error) {
     const appError = normalizeError(error, ErrorResource.ARTICLE);
-
     return {
       success: false,
       error: handleError(appError),
@@ -193,7 +195,7 @@ export async function publishArticleAction(
 }
 export async function updateArticleStatusAction(
   articleId: string,
-  status: "DRAFT" | "PUBLISHED",
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED",
 ) {
   try {
     const user = await requireAuth();
@@ -278,6 +280,8 @@ export async function updateArticleAction(
       title: formData.get("title"),
       content: formData.get("content"),
       excerpt: formData.get("excerpt") || undefined,
+      allowLikes: formData.get("allowLikes") === "true",
+      allowComments: formData.get("allowComments") === "true",
     });
     if (!result.success) {
       return {
@@ -301,6 +305,9 @@ export async function updateArticleAction(
         article: {
           id: article.id,
           title: article.title,
+          allowLikes: article.allowLikes,
+          allowComments: article.allowComments,
+          // allowShares: article.allowShares,
         },
       },
     };
@@ -333,7 +340,11 @@ export async function deleteArticleAction(
     };
   }
 }
-
+const featureLabels = {
+  allowLikes: "Like",
+  allowComments: "Comment",
+  allowShares: "Share",
+} as const;
 export async function updateArticleFeaturesAction(
   _previousState: UpdateArticleFeaturesState,
   formData: FormData,
@@ -341,23 +352,6 @@ export async function updateArticleFeaturesAction(
   try {
     const user = await requireAuth();
     const articleId = formData.get("articleId");
-    const result = updateArticleFeatureSchema.safeParse({
-      allowLikes:
-        formData.get("allowLikes") !== null
-          ? formData.get("allowLikes") === "true"
-          : undefined,
-
-      allowComments:
-        formData.get("allowComments") !== null
-          ? formData.get("allowComments") === "true"
-          : undefined,
-
-      allowShares:
-        formData.get("allowShares") !== null
-          ? formData.get("allowShares") === "true"
-          : undefined,
-    });
-
     if (!articleId || typeof articleId !== "string") {
       return {
         success: false,
@@ -368,6 +362,17 @@ export async function updateArticleFeaturesAction(
         },
       };
     }
+    const result = updateArticleFeatureSchema.safeParse({
+      allowLikes:
+        formData.get("allowLikes") !== null
+          ? formData.get("allowLikes") === "true"
+          : undefined,
+
+      allowComments:
+        formData.get("allowComments") !== null
+          ? formData.get("allowComments") === "true"
+          : undefined,
+    });
 
     if (!result.success) {
       return {
@@ -380,21 +385,38 @@ export async function updateArticleFeaturesAction(
         },
       };
     }
-
     const article = await articleService.updateArticlesFeatures(
       articleId,
       result.data,
       user,
     );
+
+    const changedFeature = Object.entries(result.data).find(
+      ([, value]) => typeof value === "boolean",
+    );
+
+    let message = "Article feature updated successfully.";
+
+    if (changedFeature) {
+      const [feature, value] = changedFeature as [
+        keyof typeof featureLabels,
+        boolean,
+      ];
+
+      message = `${featureLabels[feature]} ${
+        value ? "enabled" : "disabled"
+      } successfully.`;
+    }
+
     return {
       success: true,
-      message: "Article features updated successfully.",
-      data: {
-        article,
-      },
+      message,
+      data: { article },
     };
   } catch (error) {
+    console.error("Error in updateArticleFeaturesAction:", error);
     const appError = normalizeError(error, ErrorResource.ARTICLE);
+
     return {
       success: false,
       error: handleError(appError),

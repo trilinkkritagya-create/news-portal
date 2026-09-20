@@ -38,7 +38,7 @@ export default function EditArticleForm({ article }: EditArticleFormProps) {
   const updateArticleActionWithId = updateArticleAction.bind(null, article.id);
   const [state, formAction, isPending] = useActionState(
     updateArticleActionWithId,
-    initialState
+    initialState,
   );
 
   const [title, setTitle] = useState(article.title || "");
@@ -46,10 +46,9 @@ export default function EditArticleForm({ article }: EditArticleFormProps) {
   const [contentHtml, setContentHtml] = useState(article.content || "");
   const [allowLikes, setAllowLikes] = useState(article.allowLikes ?? true);
   const [allowComments, setAllowComments] = useState(
-    article.allowComments ?? true
+    article.allowComments ?? true,
   );
 
-  // Successful update navigation
   useEffect(() => {
     if (state.success) {
       router.push("/dashboard");
@@ -75,7 +74,6 @@ export default function EditArticleForm({ article }: EditArticleFormProps) {
             Edit Article
           </h1>
         </div>
-
         <button
           type="submit"
           form="edit-article-form"
@@ -148,8 +146,12 @@ export default function EditArticleForm({ article }: EditArticleFormProps) {
                   </div>
                 </div>
                 <input
-                  type="checkbox"
+                  type="hidden"
                   name="allowLikes"
+                  value={String(allowLikes)}
+                />
+                <input
+                  type="checkbox"
                   checked={allowLikes}
                   onChange={(e) => setAllowLikes(e.target.checked)}
                   className="w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer"
@@ -169,8 +171,12 @@ export default function EditArticleForm({ article }: EditArticleFormProps) {
                   </div>
                 </div>
                 <input
-                  type="checkbox"
+                  type="hidden"
                   name="allowComments"
+                  value={String(allowComments)}
+                />
+                <input
+                  type="checkbox"
                   checked={allowComments}
                   onChange={(e) => setAllowComments(e.target.checked)}
                   className="w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer"

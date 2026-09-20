@@ -9,7 +9,6 @@ export default async function CommentsPage() {
 
   return (
     <div className="flex flex-1 flex-col min-h-screen bg-[#F8FAFC] dark:bg-[#090e17] text-foreground">
-      {/* Interactive Comments Moderation View with Integrated Sticky Top Nav */}
       <CommentsModerationView initialData={data} />
     </div>
   );
