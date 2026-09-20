@@ -1,7 +1,11 @@
 import prisma from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma/enums";
 
-export type CommentModerationStatus = "PENDING" | "APPROVED" | "FLAGGED" | "SPAM";
+export type CommentModerationStatus =
+  | "PENDING"
+  | "APPROVED"
+  | "FLAGGED"
+  | "SPAM";
 
 export interface ModerationCommentItem {
   id: string;
@@ -55,7 +59,8 @@ export const MOCK_MODERATION_COMMENTS: ModerationCommentItem[] = [
       id: "usr-member-1",
       name: "Eleanor Vance",
       email: "e.vance@newsportal.press",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+      image:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
       role: "MEMBER",
       isVerified: true,
     },
@@ -78,13 +83,15 @@ export const MOCK_MODERATION_COMMENTS: ModerationCommentItem[] = [
       id: "usr-author-2",
       name: "Marcus H. Sterling",
       email: "m.sterling@columbia.edu",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      image:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
       role: "AUTHOR",
       isVerified: true,
     },
     article: {
       id: "art-2",
-      title: "Treasury Announces Revised Yield Projections for Sovereign Green Bonds",
+      title:
+        "Treasury Announces Revised Yield Projections for Sovereign Green Bonds",
       slug: "treasury-announces-revised-yield-projections-sovereign-green-bonds",
       categoryName: "National Economics",
       categoryColor: "#10b981",
@@ -108,7 +115,8 @@ export const MOCK_MODERATION_COMMENTS: ModerationCommentItem[] = [
     },
     article: {
       id: "art-3",
-      title: "Global Central Banks Announce Unified Cross-Border Settlement Protocol",
+      title:
+        "Global Central Banks Announce Unified Cross-Border Settlement Protocol",
       slug: "central-banks-unified-cross-border-settlement",
       categoryName: "Business & Markets",
       categoryColor: "#10b981",
@@ -125,13 +133,15 @@ export const MOCK_MODERATION_COMMENTS: ModerationCommentItem[] = [
       id: "usr-member-2",
       name: "Sarah Jenkins, AIA",
       email: "s.jenkins@archstudio.de",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+      image:
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
       role: "MEMBER",
       isVerified: true,
     },
     article: {
       id: "art-4",
-      title: "The Renaissance of Sustainable Architecture: Timber Skyscrapers in Urban Centers",
+      title:
+        "The Renaissance of Sustainable Architecture: Timber Skyscrapers in Urban Centers",
       slug: "renaissance-sustainable-architecture-timber-skyscrapers",
       categoryName: "Culture & Arts",
       categoryColor: "#ec4899",
@@ -143,7 +153,8 @@ export const MOCK_MODERATION_COMMENTS: ModerationCommentItem[] = [
       "Anyone who supports these autonomous electric race series has zero understanding of true motorsport heritage. This is utterly pathetic.",
     createdAt: new Date(Date.now() - 1000 * 60 * 240).toISOString(), // 4h ago
     status: "FLAGGED",
-    flagReason: "User Reported (3 times): Harassment / Non-constructive discourse",
+    flagReason:
+      "User Reported (3 times): Harassment / Non-constructive discourse",
     likesCount: 0,
     user: {
       id: "usr-member-3",
@@ -155,7 +166,8 @@ export const MOCK_MODERATION_COMMENTS: ModerationCommentItem[] = [
     },
     article: {
       id: "art-5",
-      title: "Autonomous Electric Grand Prix Series Confirms 12-City World Championship",
+      title:
+        "Autonomous Electric Grand Prix Series Confirms 12-City World Championship",
       slug: "autonomous-electric-grand-prix-world-championship",
       categoryName: "Sports & Athletics",
       categoryColor: "#f59e0b",
@@ -172,13 +184,15 @@ export const MOCK_MODERATION_COMMENTS: ModerationCommentItem[] = [
       id: "usr-author-2",
       name: "Marcus Sterling",
       email: "marcus.s@marketinsider.com",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      image:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
       role: "AUTHOR",
       isVerified: true,
     },
     article: {
       id: "art-1",
-      title: "Next-Gen Quantum Neural Networks Achieve Real-Time Climate Simulation",
+      title:
+        "Next-Gen Quantum Neural Networks Achieve Real-Time Climate Simulation",
       slug: "quantum-neural-networks-climate-simulation",
       categoryName: "Technology",
       categoryColor: "#3b82f6",
@@ -202,7 +216,8 @@ export const MOCK_MODERATION_COMMENTS: ModerationCommentItem[] = [
     },
     article: {
       id: "art-2",
-      title: "Global Central Banks Announce Unified Cross-Border Settlement Protocol",
+      title:
+        "Global Central Banks Announce Unified Cross-Border Settlement Protocol",
       slug: "central-banks-unified-cross-border-settlement",
       categoryName: "Business & Markets",
       categoryColor: "#10b981",
@@ -241,35 +256,43 @@ export async function getCommentsDashboardData(): Promise<CommentsDashboardData>
     });
 
     if (dbComments && dbComments.length > 0) {
-      const formattedComments: ModerationCommentItem[] = dbComments.map((c, idx) => ({
-        id: c.id,
-        content: c.content,
-        createdAt: c.createdAt.toISOString(),
-        status: idx % 4 === 1 ? "FLAGGED" : "APPROVED",
-        flagReason: idx % 4 === 1 ? "Keyword inspection trigger" : undefined,
-        isPinned: idx === 0,
-        likesCount: Math.floor(Math.random() * 15),
-        user: {
-          id: c.user.id,
-          name: c.user.name || "Anonymous Reader",
-          email: c.user.email,
-          image: c.user.image,
-          role: c.user.role,
-          isVerified: c.user.role !== UserRole.MEMBER,
-        },
-        article: {
-          id: c.article.id,
-          title: c.article.title,
-          slug: c.article.slug,
-          categoryName: c.article.category?.name || "General Desk",
-          categoryColor: "#3b82f6",
-        },
-      }));
+      const formattedComments: ModerationCommentItem[] = dbComments.map(
+        (c, idx) => ({
+          id: c.id,
+          content: c.content,
+          createdAt: c.createdAt.toISOString(),
+          status: idx % 4 === 1 ? "FLAGGED" : "APPROVED",
+          flagReason: idx % 4 === 1 ? "Keyword inspection trigger" : undefined,
+          isPinned: idx === 0,
+          likesCount: Math.floor(Math.random() * 15),
+          user: {
+            id: c.user.id,
+            name: c.user.name || "Anonymous Reader",
+            email: c.user.email,
+            image: c.user.image,
+            role: c.user.role,
+            isVerified: c.user.role !== UserRole.MEMBER,
+          },
+          article: {
+            id: c.article.id,
+            title: c.article.title,
+            slug: c.article.slug,
+            categoryName: c.article.category?.name || "General Desk",
+            categoryColor: "#3b82f6",
+          },
+        }),
+      );
 
       const totalComments = formattedComments.length;
-      const flaggedCount = formattedComments.filter((c) => c.status === "FLAGGED").length;
-      const approvedCount = formattedComments.filter((c) => c.status === "APPROVED").length;
-      const spamCount = formattedComments.filter((c) => c.status === "SPAM").length;
+      const flaggedCount = formattedComments.filter(
+        (c) => c.status === "FLAGGED",
+      ).length;
+      const approvedCount = formattedComments.filter(
+        (c) => c.status === "APPROVED",
+      ).length;
+      const spamCount = formattedComments.filter(
+        (c) => c.status === "SPAM",
+      ).length;
 
       return {
         stats: {
@@ -284,10 +307,12 @@ export async function getCommentsDashboardData(): Promise<CommentsDashboardData>
       };
     }
   } catch (error) {
-    console.warn("Prisma comment fetch fallback to mock moderation data:", error);
+    console.warn(
+      "Prisma comment fetch fallback to mock moderation data:",
+      error,
+    );
   }
 
-  // Fallback to rich mock moderation data
   const totalComments = 1420;
   const flaggedCount = 14;
   const approvedCount = 1386;

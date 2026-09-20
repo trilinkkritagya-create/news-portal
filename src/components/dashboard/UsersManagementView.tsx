@@ -59,22 +59,30 @@ export default function UsersManagementView({
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
-  const [sortBy, setSortBy] = useState<"newest" | "name" | "articles">("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "name" | "articles">(
+    "newest",
+  );
 
   // Invite Modal state
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"AUTHOR" | "ADMIN" | "MEMBER">("AUTHOR");
+  const [inviteRole, setInviteRole] = useState<"AUTHOR" | "ADMIN" | "MEMBER">(
+    "AUTHOR",
+  );
   const [inviteBio, setInviteBio] = useState("");
   const [isSubmittingInvite, setIsSubmittingInvite] = useState(false);
 
   // Edit / Role Modal state
-  const [editingUser, setEditingUser] = useState<DashboardUserItem | null>(null);
+  const [editingUser, setEditingUser] = useState<DashboardUserItem | null>(
+    null,
+  );
   const [editRole, setEditRole] = useState<string>("AUTHOR");
 
   // Deletion Modal state
-  const [deleteTarget, setDeleteTarget] = useState<DashboardUserItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DashboardUserItem | null>(
+    null,
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Toast feedback state
@@ -159,7 +167,7 @@ export default function UsersManagementView({
   const handleSaveRole = () => {
     if (!editingUser) return;
     setUsers((prev) =>
-      prev.map((u) => (u.id === editingUser.id ? { ...u, role: editRole } : u))
+      prev.map((u) => (u.id === editingUser.id ? { ...u, role: editRole } : u)),
     );
     showToast(`Role updated to ${editRole} for ${editingUser.name}.`);
     setEditingUser(null);
@@ -169,12 +177,12 @@ export default function UsersManagementView({
   const handleToggleStatus = (user: DashboardUserItem) => {
     const nextStatus = user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
     setUsers((prev) =>
-      prev.map((u) => (u.id === user.id ? { ...u, status: nextStatus } : u))
+      prev.map((u) => (u.id === user.id ? { ...u, status: nextStatus } : u)),
     );
     showToast(
       nextStatus === "SUSPENDED"
         ? `Account for ${user.name} suspended.`
-        : `Account for ${user.name} reinstated.`
+        : `Account for ${user.name} reinstated.`,
     );
   };
 
@@ -193,7 +201,15 @@ export default function UsersManagementView({
   // Export CSV
   const handleExportCSV = () => {
     if (filteredUsers.length === 0) return;
-    const headers = ["ID", "Name", "Email", "Role", "Status", "Articles Count", "Joined Date"];
+    const headers = [
+      "ID",
+      "Name",
+      "Email",
+      "Role",
+      "Status",
+      "Articles Count",
+      "Joined Date",
+    ];
     const rows = filteredUsers.map((u) => [
       `"${u.id}"`,
       `"${u.name.replace(/"/g, '""')}"`,
@@ -211,7 +227,7 @@ export default function UsersManagementView({
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `chronicle-users-roster-${new Date().toISOString().slice(0, 10)}.csv`
+      `chronicle-users-roster-${new Date().toISOString().slice(0, 10)}.csv`,
     );
     document.body.appendChild(link);
     link.click();
@@ -262,7 +278,9 @@ export default function UsersManagementView({
               }`}
             >
               <span>All</span>
-              <span className="text-[10px] font-mono opacity-80">{counts.all}</span>
+              <span className="text-[10px] font-mono opacity-80">
+                {counts.all}
+              </span>
             </button>
             <button
               type="button"
@@ -274,7 +292,9 @@ export default function UsersManagementView({
               }`}
             >
               <span>Admins</span>
-              <span className="text-[10px] font-mono opacity-80">{counts.admins}</span>
+              <span className="text-[10px] font-mono opacity-80">
+                {counts.admins}
+              </span>
             </button>
             <button
               type="button"
@@ -286,7 +306,9 @@ export default function UsersManagementView({
               }`}
             >
               <span>Authors</span>
-              <span className="text-[10px] font-mono opacity-80">{counts.authors}</span>
+              <span className="text-[10px] font-mono opacity-80">
+                {counts.authors}
+              </span>
             </button>
             <button
               type="button"
@@ -298,7 +320,9 @@ export default function UsersManagementView({
               }`}
             >
               <span>Members</span>
-              <span className="text-[10px] font-mono opacity-80">{counts.members}</span>
+              <span className="text-[10px] font-mono opacity-80">
+                {counts.members}
+              </span>
             </button>
           </div>
         </div>
@@ -326,7 +350,9 @@ export default function UsersManagementView({
           </label>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as "newest" | "name" | "articles")}
+            onChange={(e) =>
+              setSortBy(e.target.value as "newest" | "name" | "articles")
+            }
             className="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500 font-sans cursor-pointer"
           >
             <option value="newest">Newest Joined First</option>
@@ -370,7 +396,7 @@ export default function UsersManagementView({
           <Download className="h-3.5 w-3.5 text-slate-400" />
           <span>Export Roster (.CSV)</span>
         </button>
-      </div>
+      </div>,
     );
 
     return () => {
@@ -418,10 +444,10 @@ export default function UsersManagementView({
                 roleFilter === "ADMIN"
                   ? "bg-purple-50 text-purple-700 dark:text-purple-300 border-purple-300/80 dark:border-purple-700"
                   : roleFilter === "AUTHOR"
-                  ? "bg-blue-50 text-blue-700 dark:text-blue-300 border-blue-300/80 dark:border-blue-700"
-                  : roleFilter === "MEMBER"
-                  ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300 border-emerald-300/80 dark:border-emerald-700"
-                  : "bg-white text-[#881337] dark:text-rose-400 border-slate-200 dark:border-slate-700 dark:bg-slate-800"
+                    ? "bg-blue-50 text-blue-700 dark:text-blue-300 border-blue-300/80 dark:border-blue-700"
+                    : roleFilter === "MEMBER"
+                      ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300 border-emerald-300/80 dark:border-emerald-700"
+                      : "bg-white text-[#881337] dark:text-rose-400 border-slate-200 dark:border-slate-700 dark:bg-slate-800"
               }`}
             >
               <span
@@ -429,21 +455,22 @@ export default function UsersManagementView({
                   roleFilter === "ADMIN"
                     ? "bg-purple-500 animate-pulse"
                     : roleFilter === "AUTHOR"
-                    ? "bg-blue-500"
-                    : roleFilter === "MEMBER"
-                    ? "bg-emerald-500"
-                    : "bg-[#881337] animate-pulse"
+                      ? "bg-blue-500"
+                      : roleFilter === "MEMBER"
+                        ? "bg-emerald-500"
+                        : "bg-[#881337] animate-pulse"
                 }`}
               />
               <span className="capitalize truncate">
-                {roleFilter === "ALL" ? "All Roles" : roleFilter.toLowerCase()} (
+                {roleFilter === "ALL" ? "All Roles" : roleFilter.toLowerCase()}{" "}
+                (
                 {roleFilter === "ALL"
                   ? counts.all
                   : roleFilter === "ADMIN"
-                  ? counts.admins
-                  : roleFilter === "AUTHOR"
-                  ? counts.authors
-                  : counts.members}
+                    ? counts.admins
+                    : roleFilter === "AUTHOR"
+                      ? counts.authors
+                      : counts.members}
                 )
               </span>
             </span>
@@ -763,7 +790,9 @@ export default function UsersManagementView({
               </span>
             </div>
 
-            {(roleFilter !== "ALL" || statusFilter !== "ALL" || searchQuery) && (
+            {(roleFilter !== "ALL" ||
+              statusFilter !== "ALL" ||
+              searchQuery) && (
               <button
                 type="button"
                 onClick={resetFilters}
@@ -781,11 +810,15 @@ export default function UsersManagementView({
               <thead>
                 <tr className="border-b border-[#E2E8F0] dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
                   <th className="py-2.5 pl-4 pr-2 font-medium">User Profile</th>
-                  <th className="py-2.5 px-3 font-medium">Role &amp; Permissions</th>
+                  <th className="py-2.5 px-3 font-medium">
+                    Role &amp; Permissions
+                  </th>
                   <th className="py-2.5 px-3 font-medium">Filed Dispatches</th>
                   <th className="py-2.5 px-3 font-medium">Status</th>
                   <th className="py-2.5 px-3 font-medium">Joined Date</th>
-                  <th className="py-2.5 pl-2 pr-4 text-right font-medium">Actions</th>
+                  <th className="py-2.5 pl-2 pr-4 text-right font-medium">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E8F0] dark:divide-slate-800">
@@ -812,7 +845,9 @@ export default function UsersManagementView({
                         <td className="py-3 pl-4 pr-2">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8.5 w-8.5 border border-slate-200 dark:border-slate-700 shrink-0">
-                              {user.image && <AvatarImage src={user.image} alt={user.name} />}
+                              {user.image && (
+                                <AvatarImage src={user.image} alt={user.name} />
+                              )}
                               <AvatarFallback className="text-xs font-mono font-bold bg-muted text-foreground">
                                 {user.name.charAt(0).toUpperCase()}
                               </AvatarFallback>
@@ -906,7 +941,11 @@ export default function UsersManagementView({
                                   ? "text-muted-foreground hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30"
                                   : "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100"
                               }`}
-                              title={user.status === "ACTIVE" ? "Suspend user account" : "Reactivate account"}
+                              title={
+                                user.status === "ACTIVE"
+                                  ? "Suspend user account"
+                                  : "Reactivate account"
+                              }
                             >
                               <Power className="h-3.5 w-3.5" />
                             </button>
@@ -995,13 +1034,21 @@ export default function UsersManagementView({
                 <select
                   value={inviteRole}
                   onChange={(e) =>
-                    setInviteRole(e.target.value as "AUTHOR" | "ADMIN" | "MEMBER")
+                    setInviteRole(
+                      e.target.value as "AUTHOR" | "ADMIN" | "MEMBER",
+                    )
                   }
                   className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-sans cursor-pointer"
                 >
-                  <option value="AUTHOR">Author / Journalist (Publishing Access)</option>
-                  <option value="ADMIN">Bureau Administrator (Full Oversight)</option>
-                  <option value="MEMBER">Member Reader (Subscription Tier)</option>
+                  <option value="AUTHOR">
+                    Author / Journalist (Publishing Access)
+                  </option>
+                  <option value="ADMIN">
+                    Bureau Administrator (Full Oversight)
+                  </option>
+                  <option value="MEMBER">
+                    Member Reader (Subscription Tier)
+                  </option>
                 </select>
               </div>
 
@@ -1104,15 +1151,15 @@ export default function UsersManagementView({
                           {r === "ADMIN"
                             ? "Bureau Administrator"
                             : r === "AUTHOR"
-                            ? "Staff Author"
-                            : "Subscribed Member"}
+                              ? "Staff Author"
+                              : "Subscribed Member"}
                         </div>
                         <div className="text-[11px] text-muted-foreground">
                           {r === "ADMIN"
                             ? "Full newsroom moderation, settings, and user governance."
                             : r === "AUTHOR"
-                            ? "Can write, draft, and publish news dispatches."
-                            : "Standard read, bookmark, and reader discourse privileges."}
+                              ? "Can write, draft, and publish news dispatches."
+                              : "Standard read, bookmark, and reader discourse privileges."}
                         </div>
                       </div>
                     </div>

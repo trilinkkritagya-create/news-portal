@@ -3,13 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Bookmark,
-  Share2,
-  Clock,
-  Terminal,
-  Check,
-} from "lucide-react";
+import { Bookmark, Share2, Clock, Terminal, Check } from "lucide-react";
 import { MockArticle } from "@/lib/mock-data";
 
 interface HeroLeadSectionProps {

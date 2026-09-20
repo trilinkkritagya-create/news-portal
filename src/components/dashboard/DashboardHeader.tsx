@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Menu,
-  Search,
-  Bell,
-  PenSquare,
-} from "lucide-react";
+import { Menu, Search, Bell, PenSquare } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 
 interface DashboardHeaderProps {
@@ -15,20 +10,17 @@ interface DashboardHeaderProps {
   role?: string | null;
 }
 
-export default function DashboardHeader({
-  role,
-}: DashboardHeaderProps) {
+export default function DashboardHeader({ role }: DashboardHeaderProps) {
   const { toggle } = useSidebar();
   const pathname = usePathname();
-
-  const isOverview = pathname === "/dashboard" || pathname === "/dashboard/member";
+  const isOverview =
+    pathname === "/dashboard" || pathname === "/dashboard/member";
   const isArticles =
     pathname.startsWith("/dashboard/articles") ||
     pathname.startsWith("/dashboard/my-articles");
   const isUsers = pathname.startsWith("/dashboard/users");
   const isProfile = pathname.startsWith("/dashboard/profile");
 
-  // Determine section title based on route
   const getHeaderTitle = () => {
     if (role === "MEMBER") return "Reader Library";
     if (isOverview) return "Overviews";
@@ -50,7 +42,6 @@ export default function DashboardHeader({
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-[#CBD5E1] dark:border-slate-700 bg-[#E2E8F0] dark:bg-[#1E293B] px-4 sm:px-6 lg:px-8 shadow-xs gap-2">
-      {/* Left: Hamburger menu toggle (xl:hidden) + Section Title + Subtitle Badge */}
       <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
         <button
           type="button"
@@ -60,7 +51,6 @@ export default function DashboardHeader({
         >
           <Menu className="h-4.5 w-4.5" />
         </button>
-
         <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 hidden xl:block shrink-0" />
 
         <div className="min-w-0 flex items-center gap-2.5">

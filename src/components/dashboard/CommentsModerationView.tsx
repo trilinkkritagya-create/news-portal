@@ -10,14 +10,11 @@ import {
   CheckCircle2,
   ShieldCheck,
   Search,
-  Download,
   Trash2,
   Check,
   Pin,
-  PinOff,
   Reply,
   ExternalLink,
-  ChevronDown,
   X,
   Send,
   Loader2,
@@ -29,7 +26,6 @@ import {
   GraduationCap,
   Star,
   Layers,
-  Filter,
   RotateCcw,
 } from "lucide-react";
 import {
@@ -77,24 +73,27 @@ export default function CommentsModerationView({
 }: CommentsModerationViewProps) {
   const { toggle, setCustomSidebarContent } = useSidebar();
   const [comments, setComments] = useState<ModerationCommentItem[]>(
-    initialData.comments
+    initialData.comments,
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | CommentModerationStatus>("ALL");
+  const [statusFilter, setStatusFilter] = useState<
+    "ALL" | CommentModerationStatus
+  >("ALL");
   const [deskFilter, setDeskFilter] = useState<string>("ALL");
-  const [sortBy, setSortBy] = useState<"newest" | "likes" | "flagged">("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "likes" | "flagged">(
+    "newest",
+  );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [isBatchMenuOpen, setIsBatchMenuOpen] = useState(false);
 
-  // Deletion modal state
-  const [deleteTarget, setDeleteTarget] = useState<ModerationCommentItem | null>(null);
+  const [deleteTarget, setDeleteTarget] =
+    useState<ModerationCommentItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
-  // Dynamic desk list
   const deskOptions = useMemo(() => {
     const desks = new Set<string>();
     comments.forEach((c) => {
@@ -137,7 +136,9 @@ export default function CommentsModerationView({
           if (b.status === "FLAGGED" && a.status !== "FLAGGED") return 1;
         }
         // Default newest
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       });
   }, [comments, statusFilter, deskFilter, searchQuery, sortBy]);
 
@@ -151,7 +152,6 @@ export default function CommentsModerationView({
     };
   }, [comments]);
 
-  // Show transient toast feedback
   const showToast = (message: string) => {
     setActionFeedback(message);
     setTimeout(() => {
@@ -159,7 +159,6 @@ export default function CommentsModerationView({
     }, 3500);
   };
 
-  // Sync custom moderation filters to mobile/tablet sidebar drawer
   useEffect(() => {
     setCustomSidebarContent(
       <div className="space-y-3 pt-1">
@@ -168,7 +167,10 @@ export default function CommentsModerationView({
             <SlidersHorizontal className="h-3.5 w-3.5 text-[#ffd9dd]" />
             <span>Moderation Filters</span>
           </div>
-          {(statusFilter !== "ALL" || deskFilter !== "ALL" || searchQuery.trim() !== "" || sortBy !== "newest") && (
+          {(statusFilter !== "ALL" ||
+            deskFilter !== "ALL" ||
+            searchQuery.trim() !== "" ||
+            sortBy !== "newest") && (
             <button
               onClick={() => {
                 setStatusFilter("ALL");
@@ -190,10 +192,11 @@ export default function CommentsModerationView({
           <button
             type="button"
             onClick={() => setStatusFilter("ALL")}
-            className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors cursor-pointer ${statusFilter === "ALL"
+            className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors cursor-pointer ${
+              statusFilter === "ALL"
                 ? "bg-[#881337] text-white font-semibold shadow-xs"
                 : "bg-white/5 text-[#cbdbf5] hover:bg-white/10 hover:text-white"
-              }`}
+            }`}
           >
             <span className="truncate">All</span>
             <span className="ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/30">
@@ -205,10 +208,11 @@ export default function CommentsModerationView({
           <button
             type="button"
             onClick={() => setStatusFilter("FLAGGED")}
-            className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors cursor-pointer ${statusFilter === "FLAGGED"
+            className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors cursor-pointer ${
+              statusFilter === "FLAGGED"
                 ? "bg-amber-600 text-white font-semibold shadow-xs"
                 : "bg-white/5 text-[#cbdbf5] hover:bg-white/10 hover:text-white"
-              }`}
+            }`}
           >
             <span className="truncate">Flagged</span>
             <span className="ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-200">
@@ -220,10 +224,11 @@ export default function CommentsModerationView({
           <button
             type="button"
             onClick={() => setStatusFilter("APPROVED")}
-            className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors cursor-pointer ${statusFilter === "APPROVED"
+            className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors cursor-pointer ${
+              statusFilter === "APPROVED"
                 ? "bg-emerald-700 text-white font-semibold shadow-xs"
                 : "bg-white/5 text-[#cbdbf5] hover:bg-white/10 hover:text-white"
-              }`}
+            }`}
           >
             <span className="truncate">Approved</span>
             <span className="ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200">
@@ -235,10 +240,11 @@ export default function CommentsModerationView({
           <button
             type="button"
             onClick={() => setStatusFilter("SPAM")}
-            className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors cursor-pointer ${statusFilter === "SPAM"
+            className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors cursor-pointer ${
+              statusFilter === "SPAM"
                 ? "bg-rose-900 text-white font-semibold shadow-xs"
                 : "bg-white/5 text-[#cbdbf5] hover:bg-white/10 hover:text-white"
-              }`}
+            }`}
           >
             <span className="truncate">Spam</span>
             <span className="ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/30">
@@ -279,7 +285,9 @@ export default function CommentsModerationView({
               onChange={(e) => setDeskFilter(e.target.value)}
               className="w-full bg-black/25 border border-white/15 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-white/40 cursor-pointer font-sans"
             >
-              <option value="ALL" className="bg-[#213145] text-white">All Desks</option>
+              <option value="ALL" className="bg-[#213145] text-white">
+                All Desks
+              </option>
               {deskOptions.map((d) => (
                 <option key={d} value={d} className="bg-[#213145] text-white">
                   {d}
@@ -294,40 +302,55 @@ export default function CommentsModerationView({
             </label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as "newest" | "likes" | "flagged")}
+              onChange={(e) =>
+                setSortBy(e.target.value as "newest" | "likes" | "flagged")
+              }
               className="w-full bg-black/25 border border-white/15 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-white/40 cursor-pointer font-sans"
             >
-              <option value="newest" className="bg-[#213145] text-white">Newest First</option>
-              <option value="likes" className="bg-[#213145] text-white">Highest Engagement</option>
-              <option value="flagged" className="bg-[#213145] text-white">Most Flagged</option>
+              <option value="newest" className="bg-[#213145] text-white">
+                Newest First
+              </option>
+              <option value="likes" className="bg-[#213145] text-white">
+                Highest Engagement
+              </option>
+              <option value="flagged" className="bg-[#213145] text-white">
+                Most Flagged
+              </option>
             </select>
           </div>
         </div>
-      </div>
+      </div>,
     );
 
     return () => setCustomSidebarContent(null);
-  }, [statusFilter, deskFilter, searchQuery, sortBy, counts, deskOptions, setCustomSidebarContent]);
+  }, [
+    statusFilter,
+    deskFilter,
+    searchQuery,
+    sortBy,
+    counts,
+    deskOptions,
+    setCustomSidebarContent,
+  ]);
 
-  // Moderation action handlers
   const handleApprove = (id: string) => {
     setComments((prev) =>
       prev.map((c) =>
-        c.id === id ? { ...c, status: "APPROVED", flagReason: undefined } : c
-      )
+        c.id === id ? { ...c, status: "APPROVED", flagReason: undefined } : c,
+      ),
     );
     showToast("Comment marked as Approved and published.");
   };
 
   const handleTogglePin = (id: string) => {
     setComments((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, isPinned: !c.isPinned } : c))
+      prev.map((c) => (c.id === id ? { ...c, isPinned: !c.isPinned } : c)),
     );
     const item = comments.find((c) => c.id === id);
     showToast(
       item?.isPinned
         ? "Comment unpinned from story."
-        : "Comment pinned as Editor's Pick."
+        : "Comment pinned as Editor's Pick.",
     );
   };
 
@@ -336,12 +359,12 @@ export default function CommentsModerationView({
       prev.map((c) =>
         c.id === id
           ? {
-            ...c,
-            status: "SPAM",
-            flagReason: "Marked as Spam by Editorial Moderator",
-          }
-          : c
-      )
+              ...c,
+              status: "SPAM",
+              flagReason: "Marked as Spam by Editorial Moderator",
+            }
+          : c,
+      ),
     );
     showToast("Comment moved to Spam queue.");
   };
@@ -361,7 +384,6 @@ export default function CommentsModerationView({
     }
   };
 
-  // Batch actions
   const handleSelectAll = () => {
     if (selectedIds.length === filteredComments.length) {
       setSelectedIds([]);
@@ -372,7 +394,7 @@ export default function CommentsModerationView({
 
   const handleToggleSelect = (id: string) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -381,8 +403,8 @@ export default function CommentsModerationView({
       prev.map((c) =>
         selectedIds.includes(c.id)
           ? { ...c, status: "APPROVED", flagReason: undefined }
-          : c
-      )
+          : c,
+      ),
     );
     showToast(`${selectedIds.length} comments approved and published.`);
     setSelectedIds([]);
@@ -394,12 +416,12 @@ export default function CommentsModerationView({
       prev.map((c) =>
         selectedIds.includes(c.id)
           ? {
-            ...c,
-            status: "SPAM",
-            flagReason: "Bulk flagged as spam by moderator",
-          }
-          : c
-      )
+              ...c,
+              status: "SPAM",
+              flagReason: "Bulk flagged as spam by moderator",
+            }
+          : c,
+      ),
     );
     showToast(`${selectedIds.length} comments moved to spam.`);
     setSelectedIds([]);
@@ -413,7 +435,6 @@ export default function CommentsModerationView({
     setIsBatchMenuOpen(false);
   };
 
-  // Send editorial reply
   const handleSendReply = () => {
     if (!replyText.trim()) return;
     setIsSubmittingReply(true);
@@ -456,7 +477,7 @@ export default function CommentsModerationView({
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `chronicle-comments-audit-${new Date().toISOString().slice(0, 10)}.csv`
+      `chronicle-comments-audit-${new Date().toISOString().slice(0, 10)}.csv`,
     );
     document.body.appendChild(link);
     link.click();
@@ -491,24 +512,26 @@ export default function CommentsModerationView({
               Comments
             </h1>
             <span
-              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium border shadow-2xs ${statusFilter === "FLAGGED"
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium border shadow-2xs ${
+                statusFilter === "FLAGGED"
                   ? "bg-amber-50 text-amber-700 dark:text-amber-300 border-amber-300/80 dark:border-amber-700"
                   : statusFilter === "APPROVED"
                     ? "bg-emerald-50 text-emerald-700 dark:text-emerald-300 border-emerald-300/80 dark:border-emerald-700"
                     : statusFilter === "SPAM"
                       ? "bg-rose-50 text-rose-700 dark:text-rose-300 border-rose-300/80 dark:border-rose-700"
                       : "bg-white text-[#881337] dark:text-rose-400 border-slate-200 dark:border-slate-700 dark:bg-slate-800"
-                }`}
+              }`}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${statusFilter === "FLAGGED"
+                className={`w-1.5 h-1.5 rounded-full ${
+                  statusFilter === "FLAGGED"
                     ? "bg-amber-500 animate-pulse"
                     : statusFilter === "APPROVED"
                       ? "bg-emerald-500"
                       : statusFilter === "SPAM"
                         ? "bg-rose-500"
                         : "bg-[#881337] animate-pulse"
-                  }`}
+                }`}
               />
               <span className="capitalize">
                 {statusFilter === "ALL" ? "All" : statusFilter.toLowerCase()} (
@@ -533,15 +556,19 @@ export default function CommentsModerationView({
             <button
               type="button"
               onClick={() => setStatusFilter("ALL")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${statusFilter === "ALL"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                statusFilter === "ALL"
                   ? "bg-[#881337] text-white shadow-xs"
                   : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60"
-                }`}
+              }`}
             >
               <span>All Discourse</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${statusFilter === "ALL" ? "bg-white/25 text-white" : "bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
-                  }`}
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                  statusFilter === "ALL"
+                    ? "bg-white/25 text-white"
+                    : "bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
+                }`}
               >
                 {counts.all}
               </span>
@@ -551,17 +578,19 @@ export default function CommentsModerationView({
             <button
               type="button"
               onClick={() => setStatusFilter("FLAGGED")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${statusFilter === "FLAGGED"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                statusFilter === "FLAGGED"
                   ? "bg-amber-600 text-white font-semibold shadow-xs"
                   : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60"
-                }`}
+              }`}
             >
               <span>Flagged</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${statusFilter === "FLAGGED"
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                  statusFilter === "FLAGGED"
                     ? "bg-white/25 text-white"
                     : "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300"
-                  }`}
+                }`}
               >
                 {counts.flagged}
               </span>
@@ -571,17 +600,19 @@ export default function CommentsModerationView({
             <button
               type="button"
               onClick={() => setStatusFilter("APPROVED")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${statusFilter === "APPROVED"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                statusFilter === "APPROVED"
                   ? "bg-[#047857] text-white font-semibold shadow-xs"
                   : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60"
-                }`}
+              }`}
             >
               <span>Approved</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${statusFilter === "APPROVED"
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                  statusFilter === "APPROVED"
                     ? "bg-white/25 text-white"
                     : "bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] dark:bg-emerald-950/40 dark:text-emerald-300"
-                  }`}
+                }`}
               >
                 {counts.approved}
               </span>
@@ -591,17 +622,19 @@ export default function CommentsModerationView({
             <button
               type="button"
               onClick={() => setStatusFilter("SPAM")}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${statusFilter === "SPAM"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                statusFilter === "SPAM"
                   ? "bg-rose-700 text-white font-semibold shadow-xs"
                   : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/60"
-                }`}
+              }`}
             >
               <span>Spam</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${statusFilter === "SPAM"
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                  statusFilter === "SPAM"
                     ? "bg-white/25 text-white"
                     : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                  }`}
+                }`}
               >
                 {counts.spam}
               </span>
@@ -707,10 +740,11 @@ export default function CommentsModerationView({
           {/* Card 2: Review Queue */}
           <div
             onClick={() => setStatusFilter("FLAGGED")}
-            className={`cursor-pointer bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs transition-all ${statusFilter === "FLAGGED"
+            className={`cursor-pointer bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs transition-all ${
+              statusFilter === "FLAGGED"
                 ? "border-amber-500 ring-1 ring-amber-500/30"
                 : "border-[#E2E8F0] dark:border-slate-800 hover:border-amber-400"
-              }`}
+            }`}
           >
             <div className="flex items-center justify-between text-muted-foreground mb-1">
               <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-bold text-muted-foreground">
@@ -741,10 +775,11 @@ export default function CommentsModerationView({
           {/* Card 3: Published Clean */}
           <div
             onClick={() => setStatusFilter("APPROVED")}
-            className={`cursor-pointer bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs transition-all ${statusFilter === "APPROVED"
+            className={`cursor-pointer bg-card border rounded-lg sm:rounded-xl p-3 sm:p-4 flex flex-col justify-between shadow-xs transition-all ${
+              statusFilter === "APPROVED"
                 ? "border-emerald-500 ring-1 ring-emerald-500/30"
                 : "border-[#E2E8F0] dark:border-slate-800 hover:border-emerald-400"
-              }`}
+            }`}
           >
             <div className="flex items-center justify-between text-muted-foreground mb-1">
               <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider font-bold text-muted-foreground">
@@ -784,7 +819,10 @@ export default function CommentsModerationView({
             </div>
             {/* Micro-sparkline Progress indicator */}
             <div className="w-full bg-[#E2E8F0] dark:bg-slate-700 h-1 sm:h-1.5 rounded-full overflow-hidden mt-1">
-              <div className="bg-[#047857] h-full rounded-full" style={{ width: "98.4%" }}></div>
+              <div
+                className="bg-[#047857] h-full rounded-full"
+                style={{ width: "98.4%" }}
+              ></div>
             </div>
           </div>
         </section>
@@ -799,7 +837,9 @@ export default function CommentsModerationView({
                   <Layers className="h-4 w-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold leading-none">Batch Operations</div>
+                  <div className="text-xs font-bold leading-none">
+                    Batch Operations
+                  </div>
                   <span className="text-[10px] text-slate-300 font-mono">
                     {selectedIds.length} comments selected
                   </span>
@@ -850,26 +890,30 @@ export default function CommentsModerationView({
                 No matching reader comments found
               </h3>
               <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto font-sans">
-                Try adjusting your desk filter, search query, or status tab to view other community interactions.
+                Try adjusting your desk filter, search query, or status tab to
+                view other community interactions.
               </p>
             </div>
           ) : (
             filteredComments.map((comment, idx) => {
               const isSelected = selectedIds.includes(comment.id);
               const isReplying = activeReplyId === comment.id;
-              const isEleanor = comment.user.name.toLowerCase().includes("eleanor") || idx === 0;
+              const isEleanor =
+                comment.user.name.toLowerCase().includes("eleanor") ||
+                idx === 0;
 
               return (
                 <article
                   key={comment.id}
-                  className={`bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl shadow-xs hover:shadow transition-shadow overflow-hidden ${comment.isPinned
+                  className={`bg-card border border-[#E2E8F0] dark:border-slate-800 rounded-lg sm:rounded-xl shadow-xs hover:shadow transition-shadow overflow-hidden ${
+                    comment.isPinned
                       ? "border-l-[4px] border-l-[#881337]"
                       : comment.status === "FLAGGED"
                         ? "border-l-[4px] border-l-amber-500"
                         : comment.status === "SPAM"
                           ? "border-l-[4px] border-l-rose-500 opacity-80"
                           : ""
-                    }`}
+                  }`}
                 >
                   {/* Card Header & Metadata Ribbon */}
                   <div className="p-3 sm:p-4 border-b border-[#E2E8F0] dark:border-slate-800 bg-[#FAFAFA]/90 dark:bg-slate-900/90 flex flex-col gap-2">
@@ -947,7 +991,9 @@ export default function CommentsModerationView({
                         {comment.isPinned ? (
                           <div className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded bg-[#FFFBEB] dark:bg-amber-950/40 border border-[#FDE68A] dark:border-amber-800 text-[#92400E] dark:text-amber-300 text-[10px] sm:text-xs font-semibold shadow-2xs">
                             <Pin className="h-3 w-3 fill-[#92400E] dark:fill-amber-300" />
-                            <span className="hidden sm:inline">Pinned Editor&apos;s Pick</span>
+                            <span className="hidden sm:inline">
+                              Pinned Editor&apos;s Pick
+                            </span>
                             <span className="sm:hidden">Pinned</span>
                           </div>
                         ) : comment.status === "FLAGGED" ? (
@@ -979,12 +1025,15 @@ export default function CommentsModerationView({
                           target="_blank"
                           className="font-serif italic font-bold text-[#881337] dark:text-rose-300 hover:underline flex items-center gap-1 truncate max-w-xl text-[12px] sm:text-sm"
                         >
-                          <span className="truncate">{comment.article.title}</span>
+                          <span className="truncate">
+                            {comment.article.title}
+                          </span>
                           <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
                         </Link>
                       </div>
                       <div className="text-[10px] font-mono text-muted-foreground/70 mt-0.5">
-                        Section: {comment.article.categoryName || "Metro Infrastructure"}
+                        Section:{" "}
+                        {comment.article.categoryName || "Metro Infrastructure"}
                       </div>
                     </div>
                   </div>
@@ -1016,14 +1065,18 @@ export default function CommentsModerationView({
 
                         <span className="flex items-center gap-1">
                           <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span>{Math.max(2, (comment.likesCount % 8) + 1)} Replies</span>
+                          <span>
+                            {Math.max(2, (comment.likesCount % 8) + 1)} Replies
+                          </span>
                         </span>
                       </div>
 
                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#ECFDF5] dark:bg-emerald-950/40 border border-[#A7F3D0] dark:border-emerald-800 text-[#065F46] dark:text-emerald-300 font-mono">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#047857]"></span>
                         <span>
-                          {comment.status === "FLAGGED" ? "Heated (0.62)" : "Constructive (0.94)"}
+                          {comment.status === "FLAGGED"
+                            ? "Heated (0.62)"
+                            : "Constructive (0.94)"}
                         </span>
                       </div>
                     </div>
@@ -1034,11 +1087,15 @@ export default function CommentsModerationView({
                       {comment.status === "APPROVED" ? (
                         <button
                           type="button"
-                          onClick={() => showToast("Comment is currently approved & live.")}
+                          onClick={() =>
+                            showToast("Comment is currently approved & live.")
+                          }
                           className="col-span-2 sm:col-auto inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 rounded bg-[#047857] text-white text-xs font-medium border border-[#047857] shadow-2xs cursor-pointer active:scale-95 transition-transform"
                         >
                           <Check className="h-3.5 w-3.5" />
-                          <span className="text-[11px] sm:text-xs">Approved</span>
+                          <span className="text-[11px] sm:text-xs">
+                            Approved
+                          </span>
                         </button>
                       ) : (
                         <button
@@ -1047,7 +1104,9 @@ export default function CommentsModerationView({
                           className="col-span-2 sm:col-auto inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-1.5 rounded border border-[#047857] text-[#047857] hover:bg-[#ECFDF5] text-xs font-medium transition-colors cursor-pointer active:scale-95"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          <span className="text-[11px] sm:text-xs">Approve</span>
+                          <span className="text-[11px] sm:text-xs">
+                            Approve
+                          </span>
                         </button>
                       )}
 
@@ -1055,13 +1114,18 @@ export default function CommentsModerationView({
                       <button
                         type="button"
                         onClick={() => handleTogglePin(comment.id)}
-                        className={`col-span-1 sm:col-auto inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded text-xs font-medium transition-colors cursor-pointer active:scale-95 ${comment.isPinned
+                        className={`col-span-1 sm:col-auto inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded text-xs font-medium transition-colors cursor-pointer active:scale-95 ${
+                          comment.isPinned
                             ? "bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] hover:bg-[#FEF3C7] dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800"
                             : "border border-[#CBD5E1] dark:border-slate-700 bg-card hover:bg-muted text-foreground"
-                          }`}
+                        }`}
                       >
-                        <Pin className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${comment.isPinned ? "fill-[#92400E] dark:fill-amber-300" : ""}`} />
-                        <span className="text-[10px] sm:text-xs">{comment.isPinned ? "Pinned" : "Pin"}</span>
+                        <Pin
+                          className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${comment.isPinned ? "fill-[#92400E] dark:fill-amber-300" : ""}`}
+                        />
+                        <span className="text-[10px] sm:text-xs">
+                          {comment.isPinned ? "Pinned" : "Pin"}
+                        </span>
                       </button>
 
                       {/* Reply Button */}
@@ -1160,11 +1224,14 @@ export default function CommentsModerationView({
         {/* ==================== 4. EDITORIAL FOOTER NOTE ==================== */}
         <footer className="pt-4 sm:pt-6 pb-6 text-center sm:text-left sm:flex sm:items-center sm:justify-between border-t border-[#E2E8F0] dark:border-slate-800 text-muted-foreground text-xs font-sans gap-2">
           <div className="flex items-center justify-center sm:justify-start gap-1.5">
-            <span className="font-serif font-bold text-foreground">News Portal</span>
+            <span className="font-serif font-bold text-foreground">
+              News Portal
+            </span>
             <span>• Charter v4.2</span>
           </div>
           <div className="text-[10px] sm:text-[11px] font-mono text-muted-foreground/70 mt-1 sm:mt-0">
-            All moderation events cryptographically signed and logged for accountability.
+            All moderation events cryptographically signed and logged for
+            accountability.
           </div>
         </footer>
       </main>
@@ -1192,7 +1259,10 @@ export default function CommentsModerationView({
             </div>
 
             <div className="text-xs text-muted-foreground font-mono">
-              Comment Author: <span className="font-semibold text-foreground">{deleteTarget.user.name}</span>
+              Comment Author:{" "}
+              <span className="font-semibold text-foreground">
+                {deleteTarget.user.name}
+              </span>
             </div>
 
             <div className="flex items-center justify-end gap-2.5 pt-2">

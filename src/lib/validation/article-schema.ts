@@ -1,3 +1,4 @@
+import { ArticleStatus } from "@/generated/prisma/browser";
 import { z } from "zod";
 
 export const createArticleSchema = z.object({
@@ -41,15 +42,16 @@ export const updateArticleSchema = z
       .trim()
       .max(500, "Excerpt must not exceed 500 characters.")
       .optional(),
+    allowLikes: z.boolean().optional(),
+    allowComments: z.boolean().optional(),
   })
   .refine(
     (data) =>
       data.title !== undefined ||
       data.content !== undefined ||
-      data.excerpt !== undefined,
-    {
-      message: "At least one field is required to update the article.",
-    },
+      data.excerpt !== undefined || {
+        message: "At least one field is required to update the article.",
+      },
   );
 
 export const updateArticleFeatureSchema = z
@@ -74,4 +76,20 @@ export const createCommentSchema = z.object({
 export const updateArticleStatusSchema = z.object({
   articleId: z.string().min(1),
   status: z.enum(["DRAFT", "PUBLISHED"]),
+});
+
+export const getArticlesQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+
+  search: z.string().trim().optional(),
+
+  status: z.enum(ArticleStatus).optional(),
+
+  category: z.string().trim().optional(),
+
+  sortBy: z.enum(["createdAt", "publishedAt", "title"]).default("createdAt"),
+
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });

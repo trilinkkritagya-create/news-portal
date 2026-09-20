@@ -5,8 +5,7 @@ type props = {
 };
 
 const MemberDashboardContent = async ({ userId }: props) => {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-  // const memberData = await getMemberDashboardData(userId);
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
   const memberData = await dashboardService.getMemberDashboard(userId);
   console.log(memberData, "is memberData");
   return (

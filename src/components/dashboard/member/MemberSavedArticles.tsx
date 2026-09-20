@@ -13,6 +13,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { MemberDashboardArticle } from "@/lib/types/dashboard.types";
+import { CATEGORY_COLORS } from "@/lib/constants/extra";
+
 
 const INITIAL_PAGE_SIZE = 3;
 
@@ -159,9 +161,9 @@ export default function MemberSavedArticles({
                       <span
                         className="border px-1.5 py-0.5 font-mono text-[9px] uppercase font-bold tracking-wider rounded-xs"
                         style={{
-                          borderColor: `${article.category.color}40`,
-                          backgroundColor: `${article.category.color}15`,
-                          color: article.category.color,
+                          borderColor: `${CATEGORY_COLORS[article.category.slug] ?? "#64748b"}40`,
+                          backgroundColor: `${CATEGORY_COLORS[article.category.slug] ?? "#64748b"}15`,
+                          color: CATEGORY_COLORS[article.category.slug] ?? "#64748b",
                         }}
                       >
                         {article.category.name}
@@ -169,8 +171,9 @@ export default function MemberSavedArticles({
                     )}
                     <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-mono">
                       <Clock className="h-3 w-3" />
-                      {article.readTime}
+                      5 min read
                     </span>
+
                     <span className="text-muted-foreground/50 text-[10px]">
                       ·
                     </span>

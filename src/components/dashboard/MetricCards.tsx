@@ -1,16 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Newspaper,
-  CheckCircle2,
-  Clock,
-  Eye,
-  TrendingUp,
-  AlertCircle,
-} from "lucide-react";
+import { Newspaper, CheckCircle2, Clock, Eye, TrendingUp } from "lucide-react";
 import { AuthorDashboardStats } from "@/lib/types/dashboard.types";
-// import { DashboardStats } from "@/lib/dashboard/get-dashboard-data";
 
 interface MetricCardsProps {
   stats: AuthorDashboardStats;
@@ -106,29 +98,26 @@ export default function MetricCards({ stats }: MetricCardsProps) {
         </div>
       </Link>
 
-        {/* Card 4: Reader Impressions / Views */}
-        <div className="min-w-[200px] flex-1 bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs snap-start relative overflow-hidden flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-600 sm:hidden" />
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-              Reader Impressions
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900">
-              <Eye className="h-4 w-4" />
-            </div>
+      {/* Card 4: Reader Impressions / Views */}
+      <div className="min-w-[200px] flex-1 bg-card border border-border rounded-xl p-4 sm:p-5 shadow-2xs snap-start relative overflow-hidden flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-600 sm:hidden" />
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+            Reader Impressions
+          </span>
+          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900">
+            <Eye className="h-4 w-4" />
           </div>
-          <div className="mt-1">
-            <div className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
-              {/* {formatViews(stats.)} */}
-            </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px]">
-              <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-semibold gap-0.5">
-                <TrendingUp className="h-3.5 w-3.5" /> +24.1%
-              </span>
-              <span className="text-muted-foreground">
-                unique readers today
-              </span>
-            </div>
+        </div>
+        <div className="mt-1">
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
+            {/* {formatViews(stats.)} */}
+          </div>
+          <div className="flex items-center gap-1 mt-1 text-[11px]">
+            <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400 font-semibold gap-0.5">
+              <TrendingUp className="h-3.5 w-3.5" /> +24.1%
+            </span>
+            <span className="text-muted-foreground">unique readers today</span>
           </div>
         </div>
       </div>
